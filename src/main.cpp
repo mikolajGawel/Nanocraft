@@ -38,7 +38,7 @@ int main()
 #endif
 
     // Create window
-    GLFWwindow *window = glfwCreateWindow(800, 600, "Nanocraft: Morning_wood Edition", nullptr, nullptr);
+    GLFWwindow *window = glfwCreateWindow(1280, 720, "Nanocraft: Morning_wood Edition", nullptr, nullptr);
     if (!window)
     {
         std::cerr << "Failed to create GLFW window." << std::endl;
@@ -68,38 +68,15 @@ int main()
     Blocks::initBlocks();
 
     Blocks::Chunk chunk(glm::ivec2(0,0));
-    auto mesh = chunk.getChunkMesh();
-
-    std::vector<float> verticesVec = mesh.vertices;
-    float* vertices = verticesVec.data();
-
-    unsigned int vao;
-    glGenVertexArrays(1, &vao);
-    glBindVertexArray(vao);
-
-    unsigned int vbo;
-    glGenBuffers(1, &vbo);
-    glBindBuffer(GL_ARRAY_BUFFER, vbo);
-    glBufferData(GL_ARRAY_BUFFER, verticesVec.size() * sizeof(float), vertices, GL_STATIC_DRAW);
-
-    glEnableVertexAttribArray(0);
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(float) * 6, (void *)(0));
-    glEnableVertexAttribArray(1);
-    glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, sizeof(float) * 6, (void *)(sizeof(float) * 3));
-    glEnableVertexAttribArray(2);
-    glVertexAttribPointer(2, 1, GL_FLOAT, GL_FALSE, sizeof(float) * 6, (void *)(sizeof(float) * 5));
-
-    unsigned int ibo;
-    glGenBuffers(1, &ibo);
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ibo);
-    glBufferData(GL_ELEMENT_ARRAY_BUFFER, mesh.indices.size()*sizeof(uint), mesh.indices.data(), GL_STATIC_DRAW);
+    chunk.refreshChunk();
+    auto& chunkMesh = chunk.getChunkMesh();
 
     Graphics::Shader shader("resources/shaders/block.v.glsl","resources/shaders/block.f.glsl");
     shader.compileShader();
     shader.bindShader();
 
-    IO::Freecam camera(glm::vec3(0,0,0),-90.0f,0.0f,70.0f);
-    glm::mat4 projection = glm::perspective(glm::radians(70.0f),800.0f/600.0f,0.1f,100.0f);
+    IO::Freecam camera(glm::vec3(0,18,0),-90.0f,0.0f,70.0f);
+    glm::mat4 projection = glm::perspective(glm::radians(70.0f),1280.0f/720.0f,0.1f,100.0f);
     glm::mat4 view = camera.getView();
     glm::mat4 model = glm::mat4(1.0f);
 
@@ -124,7 +101,7 @@ int main()
 
     float sec = 0.0f;
     int frames = 0;
-
+    bool cooldown = true;
     while (!glfwWindowShouldClose(window))
     {
         lastFrame = currentFrame;
@@ -135,9 +112,15 @@ int main()
         
         shader.bindShader();
         shader.setUniformMat4f("uView",camera.getView());
-        glBindVertexArray(vao);
-        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ibo);
-        glDrawElements(GL_TRIANGLES,mesh.indices.size(),GL_UNSIGNED_INT,0);
+
+        chunkMesh.bind();
+        glDrawElements(GL_TRIANGLES,chunkMesh.getIndexCount(),GL_UNSIGNED_INT,0);
+
+        if(IO::Input::isKeyDown(GLFW_KEY_T) && cooldown){
+            cooldown = false;
+            glm::ivec3 pos = glm::ivec3(camera.position);
+            chunk.setBlock(pos.x,pos.y,pos.z,Blocks::BLOCK_AIR);
+        }
 
         // framebufferShader.bindShader();
         // Geom::Quad::draw();
@@ -150,10 +133,11 @@ int main()
         currentFrame = glfwGetTime();
         Time::DELTA_TIME = currentFrame - lastFrame;
         if(sec >= 1){
-            std::string title = "Nanocraft: Morning_wood Edition - FPS: " + std::to_string(frames);
+            std::string title = "Nanocraft FPS: " + std::to_string(frames);
             glfwSetWindowTitle(window,title.c_str());
             frames = 0;
-            sec = 0;
+            sec -= 1.0f;
+            cooldown = true;
         }
         frames++;
         sec += Time::DELTA_TIME;

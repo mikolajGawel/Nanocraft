@@ -5,7 +5,8 @@ namespace Blocks{
     enum BlockType{
         BLOCK_AIR = 0,
         BLOCK_DIRT,
-        BLOCK_GRASS
+        BLOCK_GRASS,
+        BLOCK_STONE,
     };
     struct Block{
         BlockType id;
