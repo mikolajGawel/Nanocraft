@@ -9,7 +9,7 @@
 #include "io/Input.hpp"
 #include "util/Time.hpp"
 #include "io/Freecam.hpp"
-
+#include "blocks/Chunk.hpp"
 #include <glm/gtc/matrix_transform.hpp> 
 void errorCallback(int error, const char *description)
 {
@@ -65,22 +65,13 @@ int main()
         std::cerr << "OpenGL 3.3 not supported." << std::endl;
         return -1;
     }
+    Blocks::initBlocks();
 
-    Blocks::Block block(glm::vec3(0,0,0),Blocks::BlockTextureMap::all(3));
-    block.faces.east = false;
-    Blocks::Block block2(glm::vec3(0,0,1),Blocks::BlockTextureMap::all(2));
-    block2.faces.west = false;
-    auto mesh = block.generateMesh();
-    auto mesh2 = block2.generateMesh();
-    for(size_t i : mesh2.indices){
-        mesh.indices.push_back(i + mesh.vertices.size()/6);
-    }
-    mesh.vertices.insert(mesh.vertices.end(),mesh2.vertices.begin(),mesh2.vertices.end());
+    Blocks::Chunk chunk(glm::ivec2(0,0));
+    auto mesh = chunk.getChunkMesh();
 
-    
     std::vector<float> verticesVec = mesh.vertices;
     float* vertices = verticesVec.data();
-
 
     unsigned int vao;
     glGenVertexArrays(1, &vao);
@@ -106,7 +97,7 @@ int main()
     Graphics::Shader shader("resources/shaders/block.v.glsl","resources/shaders/block.f.glsl");
     shader.compileShader();
     shader.bindShader();
-    
+
     IO::Freecam camera(glm::vec3(0,0,0),-90.0f,0.0f,70.0f);
     glm::mat4 projection = glm::perspective(glm::radians(70.0f),800.0f/600.0f,0.1f,100.0f);
     glm::mat4 view = camera.getView();
@@ -122,6 +113,10 @@ int main()
     glBindTexture(GL_TEXTURE_2D,textureAtlas.getTexureID()); 
     shader.setUniformf("uCellWidth", textureAtlas.getCellWidthRatio());
     shader.setUniformf("uCellHeight",textureAtlas.getCellHeightRatio());
+    // Geom::Quad::init();
+
+    // Graphics::Shader framebufferShader("resources/shaders/framebuffer.v.glsl","resources/shaders/framebuffer.f.glsl");
+    // framebufferShader.compileShader();
     // Main loop
 
     float lastFrame = 0.0f;
@@ -138,17 +133,25 @@ int main()
         glEnable(GL_DEPTH_TEST);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
         
-        glDrawElements(GL_TRIANGLES,36*2,GL_UNSIGNED_INT,0);
+        shader.bindShader();
+        shader.setUniformMat4f("uView",camera.getView());
+        glBindVertexArray(vao);
+        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ibo);
+        glDrawElements(GL_TRIANGLES,mesh.indices.size(),GL_UNSIGNED_INT,0);
 
+        // framebufferShader.bindShader();
+        // Geom::Quad::draw();
+        
         glfwSwapBuffers(window);
         glfwPollEvents();
         
         camera.update();
-        shader.setUniformMat4f("uView",camera.getView());
 
         currentFrame = glfwGetTime();
         Time::DELTA_TIME = currentFrame - lastFrame;
         if(sec >= 1){
+            std::string title = "Nanocraft: Morning_wood Edition - FPS: " + std::to_string(frames);
+            glfwSetWindowTitle(window,title.c_str());
             frames = 0;
             sec = 0;
         }

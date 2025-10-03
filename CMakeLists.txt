@@ -9,8 +9,11 @@ add_executable(${PROJECT_NAME}
     src/graphics/Shader.cpp
     src/graphics/Camera.cpp
     src/graphics/Texture.cpp
-    src/blocks/BlockFace.cpp
+    src/blocks/Chunk.cpp
     src/blocks/Block.cpp
+    src/geom/BlockFace.cpp
+    src/geom/BlockMesh.cpp
+    src/geom/Quad.cpp
     src/io/Input.cpp
     src/io/Freecam.cpp
     src/util/Time.cpp

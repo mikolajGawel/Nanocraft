@@ -1,9 +1,9 @@
 #include "BlockFace.hpp"
-Blocks::BlockFace::BlockFace(std::array<Geom::Vertex, 4> vertices, std::array<uint, 6> indices)
+Geom::BlockFace::BlockFace(std::array<Geom::Vertex, 4> vertices, std::array<uint, 6> indices)
     : vertices(vertices), indices(indices)
 {
 }
-std::vector<float> Blocks::BlockFace::getVerticesArray(glm::vec3 blockPosition, uint textureID)
+std::vector<float> Geom::BlockFace::getVerticesArray(glm::vec3 blockPosition, uint textureID)
 {
     std::vector<float> result = {};
     for (Geom::Vertex vertex : vertices)
