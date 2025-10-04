@@ -11,6 +11,7 @@
 #include "io/Freecam.hpp"
 #include "blocks/Chunk.hpp"
 #include <glm/gtc/matrix_transform.hpp> 
+#include "world/World.hpp"
 void errorCallback(int error, const char *description)
 {
     std::cerr << "GLFW Error (" << error << "): " << description << std::endl;
@@ -67,9 +68,9 @@ int main()
     }
     Blocks::initBlocks();
 
-    Blocks::Chunk chunk(glm::ivec2(0,0));
-    chunk.refreshChunk();
-    auto& chunkMesh = chunk.getChunkMesh();
+    World world;
+    // Blocks::Chunk chunk = Blocks::Chunk::generateFlatChunk(glm::ivec2(0,0),16);
+    // auto& chunkMesh = chunk.getChunkMesh();
 
     Graphics::Shader shader("resources/shaders/block.v.glsl","resources/shaders/block.f.glsl");
     shader.compileShader();
@@ -90,10 +91,7 @@ int main()
     glBindTexture(GL_TEXTURE_2D,textureAtlas.getTexureID()); 
     shader.setUniformf("uCellWidth", textureAtlas.getCellWidthRatio());
     shader.setUniformf("uCellHeight",textureAtlas.getCellHeightRatio());
-    // Geom::Quad::init();
 
-    // Graphics::Shader framebufferShader("resources/shaders/framebuffer.v.glsl","resources/shaders/framebuffer.f.glsl");
-    // framebufferShader.compileShader();
     // Main loop
 
     float lastFrame = 0.0f;
@@ -113,17 +111,14 @@ int main()
         shader.bindShader();
         shader.setUniformMat4f("uView",camera.getView());
 
-        chunkMesh.bind();
-        glDrawElements(GL_TRIANGLES,chunkMesh.getIndexCount(),GL_UNSIGNED_INT,0);
+        world.update(camera.position);
+        world.render();
 
         if(IO::Input::isKeyDown(GLFW_KEY_T) && cooldown){
             cooldown = false;
-            glm::ivec3 pos = glm::ivec3(camera.position);
-            chunk.setBlock(pos.x,pos.y,pos.z,Blocks::BLOCK_AIR);
+            // glm::ivec3 pos = glm::ivec3(camera.position);
+            // chunk.setBlock(pos.x,pos.y,pos.z,Blocks::BLOCK_AIR);
         }
-
-        // framebufferShader.bindShader();
-        // Geom::Quad::draw();
         
         glfwSwapBuffers(window);
         glfwPollEvents();

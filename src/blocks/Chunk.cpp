@@ -1,18 +1,18 @@
 #include "Chunk.hpp"
 #include <geom/BlockMesh.hpp>
 #include <iostream>
+
 namespace Blocks
 {
+   
     bool Chunk::checkBlock(int x, int y, int z)
     {
-        if (x < 0 || x >= CHUNK_SIZE)
-            return false;
-        if (y < 0 || y >= CHUNK_HEIGHT)
-            return false;
-        if (z < 0 || z >= CHUNK_SIZE)
-            return false;
+       if (y < 0 || y >= CHUNK_HEIGHT)
+        return false;
 
+    if (x >= 0 && x < CHUNK_SIZE && z >= 0 && z < CHUNK_SIZE)
         return (blocks[getIndex(x, y, z)] != BLOCK_AIR);
+    return false;
     }
 
     Geom::SelectedFaces Chunk::getVisibleFaces(int x, int y, int z)
@@ -28,7 +28,7 @@ namespace Blocks
     }
     size_t Chunk::getIndex(int x, int y, int z) const
     {
-        if(x < 0 || x >= CHUNK_SIZE || y < 0 || y >= CHUNK_HEIGHT || z < 0 || z >= CHUNK_SIZE)
+        if (x < 0 || x >= CHUNK_SIZE || y < 0 || y >= CHUNK_HEIGHT || z < 0 || z >= CHUNK_SIZE)
         {
             std::cerr << "Chunk::getIndex out of bounds: " << x << " " << y << " " << z << std::endl;
             return 0;
@@ -38,22 +38,27 @@ namespace Blocks
     Chunk::Chunk(glm::ivec2 chunkPosition) : chunkPosition(chunkPosition)
     {
         blocks.fill(BLOCK_AIR);
+    }
+    Chunk Chunk::generateFlatChunk(glm::ivec2 chunkPosition, uint8_t height)
+    {
+        Chunk result(chunkPosition);
         for (int x = 0; x < CHUNK_SIZE; x++)
         {
             for (int z = 0; z < CHUNK_SIZE; z++)
             {
-                for (int y = 0; y < CHUNK_SIZE; y++)
+                for (int y = 0; y < height; y++)
                 {
-                    if(y == CHUNK_SIZE - 1)
-                        blocks[getIndex(x, y, z)] = BLOCK_GRASS;
-                    else if (y > CHUNK_SIZE/2)
-                        blocks[getIndex(x, y, z)] = BLOCK_DIRT;
+                    if (y == height - 1)
+                        result.blocks[result.getIndex(x, y, z)] = BLOCK_GRASS;
+                    else if (y > height / 2)
+                        result.blocks[result.getIndex(x, y, z)] = BLOCK_DIRT;
                     else
-                        blocks[getIndex(x, y, z)] = BLOCK_STONE;
+                        result.blocks[result.getIndex(x, y, z)] = BLOCK_STONE;
                 }
             }
         }
-        refreshChunk();
+        result.refreshChunk();
+        return result;
     }
     void Chunk::refreshChunk()
     {
@@ -64,11 +69,11 @@ namespace Blocks
     Geom::BasicMesh Chunk::getBlocksMesh()
     {
         std::vector<Geom::BasicMesh> blocksMeshes;
-        for (size_t x = 0; x < CHUNK_SIZE; x++)
+        for (int x = 0; x < CHUNK_SIZE; x++)
         {
-            for (size_t z = 0; z < CHUNK_SIZE; z++)
+            for (int z = 0; z < CHUNK_SIZE; z++)
             {
-                for (size_t y = 0; y < CHUNK_HEIGHT; y++)
+                for (int y = 0; y < CHUNK_HEIGHT; y++)
                 {
                     if (blocks[getIndex(x, y, z)] > 0)
                     {
@@ -116,4 +121,4 @@ namespace Blocks
         blocks[getIndex(x, y, z)] = type;
         refreshChunk();
     }
-} // namespace name
+} // namespace Blocks

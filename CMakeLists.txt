@@ -15,6 +15,7 @@ add_executable(${PROJECT_NAME}
     src/geom/BlockMesh.cpp
     src/geom/ChunkMesh.cpp
     src/geom/Quad.cpp
+    src/world/World.cpp
     src/io/Input.cpp
     src/io/Freecam.cpp
     src/util/Time.cpp
