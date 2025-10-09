@@ -8,7 +8,7 @@ namespace Geom
     {}
     void ChunkMesh::genBuffers(){
         int chunkMaxVerticesSize = 16*16*256*sizeof(float)*6*24; // max size of chunk mesh
-        int chunkMaxIndicesSize = 16*16*256*sizeof(unsigned int)*36; // max size of chunk mesh
+        int chunkMaxIndicesSize = 16*16*256*sizeof(uint32_t)*36; // max size of chunk mesh
         glGenVertexArrays(1, &vao);
         glBindVertexArray(vao);
 
@@ -31,12 +31,12 @@ namespace Geom
     void ChunkMesh::bind(){
         if(!created) genBuffers();
         float* vertices = mesh.vertices.data();
-        unsigned int* indices = mesh.indices.data();
+        uint32_t* indices = mesh.indices.data();
 
         glBindBuffer(GL_ARRAY_BUFFER, vbo);
         glBufferSubData(GL_ARRAY_BUFFER, 0,sizeof(float)*mesh.vertices.size(),vertices); 
         glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ibo);
-        glBufferSubData(GL_ELEMENT_ARRAY_BUFFER, 0,sizeof(unsigned int)*mesh.indices.size(),indices); 
+        glBufferSubData(GL_ELEMENT_ARRAY_BUFFER, 0,sizeof(uint32_t)*mesh.indices.size(),indices); 
         glBindVertexArray(vao);
     }
     void ChunkMesh::addBlock(BasicMesh blockMesh){

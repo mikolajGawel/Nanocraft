@@ -1,7 +1,7 @@
 #include "World.hpp"
 #include <GL/gl3w.h>
 #include <algorithm>
-
+#include <stdexcept>
 World::World()
 {
 }

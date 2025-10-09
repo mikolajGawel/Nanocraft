@@ -48,23 +48,23 @@ void Freecam::rotation()
     movement_front = glm::normalize(glm::vec3(directions.x, 0.0f, directions.z));
 }
 
-int getInputAxisForward(){
-    if (Input::isKeyDown(GLFW_KEY_W) && !Input::isKeyDown(GLFW_KEY_S)) return 1;
-    else if (!Input::isKeyDown(GLFW_KEY_W) && Input::isKeyDown(GLFW_KEY_S)) return -1;
+float getInputAxisForward(){
+    if (Input::isKeyDown(GLFW_KEY_W) && !Input::isKeyDown(GLFW_KEY_S)) return 1.0f;
+    else if (!Input::isKeyDown(GLFW_KEY_W) && Input::isKeyDown(GLFW_KEY_S)) return -1.0f;
     return 0;
 }
 
-int getInputAxisSideway(){
-    if (Input::isKeyDown(GLFW_KEY_A) && !Input::isKeyDown(GLFW_KEY_D)) return 1;
-    else if (!Input::isKeyDown(GLFW_KEY_A) && Input::isKeyDown(GLFW_KEY_D)) return -1;
+float getInputAxisSideway(){
+    if (Input::isKeyDown(GLFW_KEY_A) && !Input::isKeyDown(GLFW_KEY_D)) return 1.0f;
+    else if (!Input::isKeyDown(GLFW_KEY_A) && Input::isKeyDown(GLFW_KEY_D)) return -1.0f;
     return 0;
 }
+#include <iostream>
 void Freecam::movement()
 {
     lastframe = position;
     float deltaTime = Time::DELTA_TIME;
-    float accel = movement_speed * deltaTime;
-
+    float accel = movement_speed;
     // Forward / Backward
     if(getInputAxisForward() != 0)
         forwardAcceleration = Math::accelerate(accel, maxSpeed * getInputAxisForward(), forwardAcceleration);
@@ -80,7 +80,7 @@ void Freecam::movement()
     if(Input::isKeyDown(GLFW_KEY_SPACE))
         position.y += movement_speed * 0.5f * deltaTime;
     if(Input::isKeyDown(GLFW_KEY_LEFT_SHIFT))
-        position.y -= movement_speed * 0.5 * deltaTime;
+        position.y -= movement_speed * 0.5f * deltaTime;
 
     // Apply acceleration to movement vector
     glm::vec3 right = glm::normalize(glm::cross(up, front));

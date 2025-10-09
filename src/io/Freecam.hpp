@@ -9,7 +9,7 @@ namespace IO
     class Freecam: public Graphics::Camera
 {
 private:
-	float movement_speed = 20.0f;
+	float movement_speed = 1.0f;
 	float maxSpeed = 8.0f;
 
 	glm::vec2 lastCursorPos;

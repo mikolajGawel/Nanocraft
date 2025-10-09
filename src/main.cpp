@@ -52,7 +52,7 @@ int main()
     glfwSetMouseButtonCallback(window, IO::Input::mouseButtonsCallback);
 
     glfwMakeContextCurrent(window);
-    glfwSwapInterval(0); // Enable vsync
+    glfwSwapInterval(1); // Enable vsync
 
     // Initialize GL3W
     if (gl3wInit())

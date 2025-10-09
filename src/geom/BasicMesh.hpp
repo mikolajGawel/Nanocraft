@@ -1,19 +1,20 @@
 #pragma once
 #include <vector>
+#include <cstdint>
 namespace Geom
 {
     struct BasicMesh
     {
         std::vector<float> vertices;
-        std::vector<unsigned int> indices;
+        std::vector<uint32_t> indices;
     };
     static BasicMesh mergeMeshes(const std::vector<BasicMesh> &meshes)
 {
     BasicMesh merged;
-    uint offset = 0;
+    uint32_t offset = 0;
     for (auto &mesh : meshes)
     {
-        for (uint i : mesh.indices)
+        for (uint32_t i : mesh.indices)
         {
             merged.indices.push_back(i + offset);
         }
