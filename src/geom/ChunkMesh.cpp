@@ -39,8 +39,5 @@ namespace Geom
         glBufferSubData(GL_ELEMENT_ARRAY_BUFFER, 0,sizeof(uint32_t)*mesh.indices.size(),indices); 
         glBindVertexArray(vao);
     }
-    void ChunkMesh::addBlock(BasicMesh blockMesh){
-        this->mesh = mergeMeshes({mesh,blockMesh});
-    }
 
 } // namespace Geom

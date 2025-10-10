@@ -9,6 +9,13 @@ World::~World()
 {
     loadedChunks.clear();
 }
+glm::ivec2 chunkDir[4] = {
+    glm::ivec2(0, 1),  // north
+    glm::ivec2(0, -1), // south
+    glm::ivec2(1, 0),  // east
+    glm::ivec2(-1, 0)  // west
+};
+
 void World::addChunk(std::shared_ptr<Blocks::Chunk> chunk)
 {
     auto chunkPosition = chunk->chunkPosition;
@@ -17,40 +24,84 @@ void World::addChunk(std::shared_ptr<Blocks::Chunk> chunk)
     {
         throw std::invalid_argument("Chunk Loading Error:Chunk at this position allready exists");
     }
-    chunk->refreshChunk();
-
     loadedChunks.insert({chunkPosition, chunk});
+    for (size_t i = 0; i < 4; i++) // check neighbors for chunk
+    {
+        glm::ivec2 neighborPos = chunkPosition + chunkDir[i];
+        auto neighborOpt = getChunk(neighborPos);
+        if (neighborOpt)
+        {
+            std::shared_ptr<Blocks::Chunk> neighbor = *neighborOpt;
+            auto chunkDirection = static_cast<Blocks::Chunk::ChunkDirection>(i);
+            chunk->setNeighbor(neighbor, chunkDirection);
+            neighbor->setNeighbor(chunk, Blocks::Chunk::getOpositeChunkDirection(chunkDirection));
+            // neighbor->refreshChunk();
+        }
+    }
+    // chunk->refreshChunk();
 }
 
-std::shared_ptr<Blocks::Chunk> World::getChunk(glm::ivec2 position)
+std::optional<std::shared_ptr<Blocks::Chunk>> World::getChunk(glm::ivec2 position)
 {
     auto it = loadedChunks.find(position);
     if (it != loadedChunks.end())
         return it->second;
-    return nullptr;
+    return std::nullopt;
 }
 
 #include <iostream>
+void World::create(glm::vec3 playerPosition)
+{
+    glm::ivec2 position = getChunkPosition(playerPosition);
+
+    for (int i = -2; i <= 2; i++)
+    {
+        for (int j = -2; j <= 2; j++)
+        {
+            glm::ivec2 offsetPos = position + glm::ivec2(i, j);
+            auto currChunk = loadedChunks.find(offsetPos);
+
+            if (currChunk == loadedChunks.end())
+            {
+                auto newChunk = std::make_shared<Blocks::Chunk>(Blocks::Chunk::generateFlatChunk(offsetPos, 16));
+                addChunk(newChunk);
+            }
+        }
+    }
+}
+void World::refreshNearby(glm::vec2 position) // refreshes chunk and all its neighbors
+{
+    auto currChunk = loadedChunks.find(position);
+
+    if (currChunk != loadedChunks.end())
+    {
+        currChunk->second->refreshChunkAndNeighbors();
+    }
+}
+void World::refresh()
+{
+    for (auto chunk : loadedChunks)
+    {
+        chunk.second->refreshChunk();
+    }
+}
 void World::update(glm::vec3 playerPosition)
 {
     glm::ivec2 position = getChunkPosition(playerPosition);
 
     if (position == lastPlayerPosition)
         return; // preventing to rereading chunks that were already loaded
-
     lastPlayerPosition = position;
-    for(int i = -2;i <= 2;i++){
-        for(int j = -2;j <= 2;j++){
-            glm::ivec2 offsetPos = position + glm::ivec2(i,j);
-            auto currChunk = loadedChunks.find(offsetPos);
-        
-            if (currChunk == loadedChunks.end())
-            { 
-                auto newChunk = std::make_shared<Blocks::Chunk>(Blocks::Chunk::generateFlatChunk(offsetPos, 16));
-                addChunk(newChunk);
-                newChunk->refreshChunk();
-            }
-        }
+
+    auto currChunk = loadedChunks.find(position);
+
+    if (currChunk == loadedChunks.end())
+    {
+        auto newChunk = std::make_shared<Blocks::Chunk>(Blocks::Chunk::generateFlatChunk(position, 16));
+        addChunk(newChunk);
+        refreshNearby(position);
+    }else{
+        refreshNearby(position);
     }
 }
 glm::ivec2 World::getChunkPosition(glm::vec3 position)

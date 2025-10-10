@@ -16,13 +16,15 @@ private:
     glm::ivec2 lastPlayerPosition = glm::ivec2(-1000);//stores last chunk position of player to avoid loading chunks every frame
     
     //returns chunk and nullptr if chunk not found
-    std::shared_ptr<Blocks::Chunk> getChunk(glm::ivec2 position);
+    std::optional<std::shared_ptr<Blocks::Chunk>> getChunk(glm::ivec2 position);
     void addChunk(std::shared_ptr<Blocks::Chunk> chunk);
 public:
     World();
     ~World();
-
+    void refreshNearby(glm::vec2 position);//refreshes chunk and all its neighbors
+    void refresh();
     glm::ivec2 getChunkPosition(glm::vec3 position);
     void update(glm::vec3 playerPosition);
+    void create(glm::vec3 playerPosition);
     void render();
 };

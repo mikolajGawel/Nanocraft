@@ -14,25 +14,7 @@ std::array<int, 6> textureMapToArray(Geom::BlockTextureMap textures)
 namespace Geom
 {
     static std::array<BlockFace, 6> blockFaces = {
-        // North face (x+)
-        BlockFace(
-            std::array<Vertex, 4>{
-                Vertex{{0.5f, 0.5f, -0.5f}, {1.0f, 1.0f}},
-                Vertex{{0.5f, -0.5f, -0.5f}, {1.0f, 0.0f}},
-                Vertex{{0.5f, -0.5f, 0.5f}, {0.0f, 0.0f}},
-                Vertex{{0.5f, 0.5f, 0.5f}, {0.0f, 1.0f}}},
-            {0, 1, 2,
-             2, 3, 0}),
-        // South face (x-)
-        BlockFace(
-            std::array<Vertex, 4>{
-                Vertex{{-0.5f, 0.5f, 0.5f}, {1.0f, 1.0f}},
-                Vertex{{-0.5f, -0.5f, 0.5f}, {1.0f, 0.0f}},
-                Vertex{{-0.5f, -0.5f, -0.5f}, {0.0f, 0.0f}},
-                Vertex{{-0.5f, 0.5f, -0.5f}, {0.0f, 1.0f}}},
-            {0, 1, 2,
-             2, 3, 0}),
-        // East face (z+)
+        // North face (z+)
         BlockFace(
             std::array<Vertex, 4>{
                 Vertex{{-0.5f, 0.5f, 0.5f}, {1.0f, 1.0f}},
@@ -41,7 +23,8 @@ namespace Geom
                 Vertex{{0.5f, 0.5f, 0.5f}, {0.0f, 1.0f}}},
             {0, 1, 2,
              2, 3, 0}),
-        // West face (z-)
+
+        // South face (z-)
         BlockFace(
             std::array<Vertex, 4>{
                 Vertex{{0.5f, 0.5f, -0.5f}, {1.0f, 1.0f}},
@@ -50,6 +33,27 @@ namespace Geom
                 Vertex{{-0.5f, 0.5f, -0.5f}, {0.0f, 1.0f}}},
             {0, 1, 2,
              2, 3, 0}),
+
+        // East face (x+)
+        BlockFace(
+            std::array<Vertex, 4>{
+                Vertex{{0.5f, 0.5f, -0.5f}, {1.0f, 1.0f}},
+                Vertex{{0.5f, -0.5f, -0.5f}, {1.0f, 0.0f}},
+                Vertex{{0.5f, -0.5f, 0.5f}, {0.0f, 0.0f}},
+                Vertex{{0.5f, 0.5f, 0.5f}, {0.0f, 1.0f}}},
+            {0, 1, 2,
+             2, 3, 0}),
+
+        // West face (x-)
+        BlockFace(
+            std::array<Vertex, 4>{
+                Vertex{{-0.5f, 0.5f, 0.5f}, {1.0f, 1.0f}},
+                Vertex{{-0.5f, -0.5f, 0.5f}, {1.0f, 0.0f}},
+                Vertex{{-0.5f, -0.5f, -0.5f}, {0.0f, 0.0f}},
+                Vertex{{-0.5f, 0.5f, -0.5f}, {0.0f, 1.0f}}},
+            {0, 1, 2,
+             2, 3, 0}),
+
         // Top face (y+)
         BlockFace(
             std::array<Vertex, 4>{
@@ -59,6 +63,7 @@ namespace Geom
                 Vertex{{0.5f, 0.5f, -0.5f}, {0.0f, 1.0f}}},
             {0, 1, 2,
              2, 3, 0}),
+
         // Bottom face (y-)
         BlockFace(
             std::array<Vertex, 4>{

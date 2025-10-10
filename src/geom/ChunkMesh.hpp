@@ -13,7 +13,6 @@ namespace Geom
         void genBuffers();
         void setMesh(const BasicMesh& mesh){ this->mesh = mesh; }
         void bind();
-        void addBlock(BasicMesh blockMesh);//instead of refreshing the whole chunk mesh
         size_t getIndexCount() const { return mesh.indices.size(); }
     };
     

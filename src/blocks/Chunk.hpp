@@ -11,7 +11,15 @@ namespace Blocks
     public:
         static const int CHUNK_SIZE = 16;
         static const int CHUNK_HEIGHT = 256;
+        enum ChunkDirection{
+            NORTH = 0, 
+            SOUTH = 1,
+            EAST = 2,
+            WEST = 3
+        };
+        static ChunkDirection getOpositeChunkDirection(ChunkDirection direction);
     private:
+        std::array<std::weak_ptr<Chunk>,4> neighbors;
         bool checkBlock(int x,int y,int z);
         Geom::SelectedFaces getVisibleFaces(int x,int y,int z);
         Geom::BasicMesh getBlocksMesh();
@@ -27,6 +35,8 @@ namespace Blocks
         BlockType getBlock(int x, int y, int z) const;
         void setBlock(int x, int y, int z, BlockType type);
         void refreshChunk();
+        void refreshChunkAndNeighbors();
         Geom::ChunkMesh& getChunkMesh(){ return chunkMesh; }
+        void setNeighbor(std::weak_ptr<Chunk> neighbor,ChunkDirection direction);
     };
 } // namespace Blocks

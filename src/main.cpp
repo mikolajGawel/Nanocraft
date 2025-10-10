@@ -10,7 +10,7 @@
 #include "util/Time.hpp"
 #include "io/Freecam.hpp"
 #include "blocks/Chunk.hpp"
-#include <glm/gtc/matrix_transform.hpp> 
+#include <glm/gtc/matrix_transform.hpp>
 #include "world/World.hpp"
 void errorCallback(int error, const char *description)
 {
@@ -72,27 +72,28 @@ int main()
     // Blocks::Chunk chunk = Blocks::Chunk::generateFlatChunk(glm::ivec2(0,0),16);
     // auto& chunkMesh = chunk.getChunkMesh();
 
-    Graphics::Shader shader("resources/shaders/block.v.glsl","resources/shaders/block.f.glsl");
+    Graphics::Shader shader("resources/shaders/block.v.glsl", "resources/shaders/block.f.glsl");
     shader.compileShader();
     shader.bindShader();
 
-    IO::Freecam camera(glm::vec3(0,18,0),-90.0f,0.0f,70.0f);
-    glm::mat4 projection = glm::perspective(glm::radians(70.0f),1280.0f/720.0f,0.1f,100.0f);
+    IO::Freecam camera(glm::vec3(0, 18, 0), -90.0f, 0.0f, 70.0f);
+    glm::mat4 projection = glm::perspective(glm::radians(70.0f), 1280.0f / 720.0f, 0.1f, 100.0f);
     glm::mat4 view = camera.getView();
     glm::mat4 model = glm::mat4(1.0f);
 
-    shader.setUniformMat4f("uProjection",projection);
-    shader.setUniformMat4f("uView",view);
-    shader.setUniformMat4f("uModel",model);
+    shader.setUniformMat4f("uProjection", projection);
+    shader.setUniformMat4f("uView", view);
+    shader.setUniformMat4f("uModel", model);
 
-    Graphics::TextureAtlas textureAtlas("resources/terrain.png",16,16);
+    Graphics::TextureAtlas textureAtlas("resources/terrain.png", 16, 16);
     textureAtlas.loadTexture();
     glActiveTexture(GL_TEXTURE0);
-    glBindTexture(GL_TEXTURE_2D,textureAtlas.getTexureID()); 
+    glBindTexture(GL_TEXTURE_2D, textureAtlas.getTexureID());
     shader.setUniformf("uCellWidth", textureAtlas.getCellWidthRatio());
-    shader.setUniformf("uCellHeight",textureAtlas.getCellHeightRatio());
+    shader.setUniformf("uCellHeight", textureAtlas.getCellHeightRatio());
 
     // Main loop
+    glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 
     float lastFrame = 0.0f;
     float currentFrame = glfwGetTime();
@@ -100,36 +101,58 @@ int main()
     float sec = 0.0f;
     int frames = 0;
     bool cooldown = true;
+
+    // at the setup world is refreshed 2 times in time step
+    float time;
+    int refreshes = 2;
+
+    world.create(camera.position);
     while (!glfwWindowShouldClose(window))
     {
+        if (refreshes > 0)
+        {
+            time += Time::DELTA_TIME;
+            if (time > 0.5)
+            {
+
+                time = 0;
+                world.refresh();
+                refreshes--;
+            }
+        }
         lastFrame = currentFrame;
 
         glClearColor(0.1f, 0.2f, 0.3f, 1.0f);
         glEnable(GL_DEPTH_TEST);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-        
+
         shader.bindShader();
-        shader.setUniformMat4f("uView",camera.getView());
+        shader.setUniformMat4f("uView", camera.getView());
 
-        world.update(camera.position);
         world.render();
-
-        if(IO::Input::isKeyDown(GLFW_KEY_T) && cooldown){
+        world.update(camera.position);
+        if (IO::Input::isKeyDown(GLFW_KEY_F5) && cooldown)
+        {
             cooldown = false;
-            // glm::ivec3 pos = glm::ivec3(camera.position);
-            // chunk.setBlock(pos.x,pos.y,pos.z,Blocks::BLOCK_AIR);
+            world.refresh();
         }
-        
+
+        if (IO::Input::isKeyDown(GLFW_KEY_ESCAPE))
+        {
+            glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
+            break;
+        }
         glfwSwapBuffers(window);
         glfwPollEvents();
-        
+
         camera.update();
 
         currentFrame = glfwGetTime();
         Time::DELTA_TIME = currentFrame - lastFrame;
-        if(sec >= 1){
+        if (sec >= 1)
+        {
             std::string title = "Nanocraft FPS: " + std::to_string(frames);
-            glfwSetWindowTitle(window,title.c_str());
+            glfwSetWindowTitle(window, title.c_str());
             frames = 0;
             sec -= 1.0f;
             cooldown = true;

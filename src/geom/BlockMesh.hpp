@@ -5,19 +5,19 @@ namespace Geom
 {
     struct SelectedFaces
     {
-        bool north; // x+
-        bool south; // x-
-        bool east; // z+
-        bool west; // z-
+        bool north; // z+
+        bool south; // z-
+        bool east; // x+
+        bool west; // x-
         bool top; // y+
         bool bottom; // y-
         static SelectedFaces all(){return {true,true,true,true,true,true};};
     };
     struct BlockTextureMap{
-        int north; // x+
-        int south; // x-
-        int east; // z+
-        int west; // z-
+        int north; // z+
+        int south; // z-
+        int east; // x+
+        int west; // x-
         int top; // y+
         int bottom; // y-
         static BlockTextureMap set(int north, int south, int east, int west, int top, int bottom){return {north,south,east,west,top,bottom};};
