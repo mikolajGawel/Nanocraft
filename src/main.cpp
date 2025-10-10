@@ -102,24 +102,9 @@ int main()
     int frames = 0;
     bool cooldown = true;
 
-    // at the setup world is refreshed 2 times in time step
-    float time;
-    int refreshes = 2;
-
     world.create(camera.position);
     while (!glfwWindowShouldClose(window))
     {
-        if (refreshes > 0)
-        {
-            time += Time::DELTA_TIME;
-            if (time > 0.5)
-            {
-
-                time = 0;
-                world.refresh();
-                refreshes--;
-            }
-        }
         lastFrame = currentFrame;
 
         glClearColor(0.1f, 0.2f, 0.3f, 1.0f);

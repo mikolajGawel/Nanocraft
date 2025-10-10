@@ -116,8 +116,13 @@ void World::render()
     {
         std::shared_ptr<Blocks::Chunk> chunk = iter.second;
         chunk->getChunkMesh().bind();
+        glEnable(GL_CULL_FACE);
+        glFrontFace(GL_CW);
+        glCullFace(GL_BACK);
+
         // glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
         glDrawElements(GL_TRIANGLES, chunk->getChunkMesh().getIndexCount(), GL_UNSIGNED_INT, 0);
         // glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+        glDisable(GL_CULL_FACE);
     }
 }
