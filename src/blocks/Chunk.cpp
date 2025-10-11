@@ -27,13 +27,13 @@ namespace Blocks
             return false;
             
         if (x >= 0 && x < CHUNK_SIZE && z >= 0 && z < CHUNK_SIZE)//check on chunk itself
-            return (blocks[getIndex(x, y, z)] != BLOCK_AIR);
+            return (!isBlockTransparent(blocks[getIndex(x, y, z)]));
 
         if (z == CHUNK_SIZE && x >= 0 && x < CHUNK_SIZE)//check north neighbor
         {
             if (auto north = neighbors[NORTH].lock())
             {
-                return (north->blocks[getIndex(x, y, 0)] != BLOCK_AIR);
+                return (!isBlockTransparent(north->blocks[getIndex(x, y, 0)]));
             }
             return false;
         }
@@ -41,7 +41,7 @@ namespace Blocks
         {
             if (auto south = neighbors[SOUTH].lock())
             {
-                return (south->blocks[getIndex(x, y, CHUNK_SIZE-1)] != BLOCK_AIR);
+                return (!isBlockTransparent(south->blocks[getIndex(x, y, CHUNK_SIZE-1)]));
             }
             return false;
         }
@@ -49,7 +49,7 @@ namespace Blocks
         {
             if (auto east = neighbors[EAST].lock())
             {
-                return (east->blocks[getIndex(0, y, z)] != BLOCK_AIR);
+                return (!isBlockTransparent(east->blocks[getIndex(0, y, z)]));
             }
             return false;
         }
@@ -57,7 +57,7 @@ namespace Blocks
         {
             if (auto west = neighbors[WEST].lock())
             {
-                return (west->blocks[getIndex(CHUNK_SIZE-1, y, z)] != BLOCK_AIR);
+                return (!isBlockTransparent(west->blocks[getIndex(CHUNK_SIZE-1, y, z)]));
             }
             return false;
         }

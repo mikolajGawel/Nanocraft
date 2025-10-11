@@ -2,7 +2,9 @@
 #include <GL/gl3w.h>
 #include <algorithm>
 #include <stdexcept>
-World::World()
+
+World::World(std::shared_ptr<Graphics::Camera> camera,uint8_t renderDistance):
+    camera(camera),renderDistance(renderDistance)
 {
 }
 World::~World()
@@ -50,15 +52,15 @@ std::optional<std::shared_ptr<Blocks::Chunk>> World::getChunk(glm::ivec2 positio
 }
 
 #include <iostream>
-void World::create(glm::vec3 playerPosition)
+void World::create(glm::ivec2 origin)
 {
-    glm::ivec2 position = getChunkPosition(playerPosition);
+ 
 
-    for (int i = -2; i <= 2; i++)
+    for (int i = -renderDistance; i <= renderDistance; i++)
     {
-        for (int j = -2; j <= 2; j++)
+        for (int j = -renderDistance; j <= renderDistance; j++)
         {
-            glm::ivec2 offsetPos = position + glm::ivec2(i, j);
+            glm::ivec2 offsetPos = origin + glm::ivec2(i, j);
             auto currChunk = loadedChunks.find(offsetPos);
 
             if (currChunk == loadedChunks.end())
@@ -80,14 +82,17 @@ void World::refreshNearby(glm::vec2 position) // refreshes chunk and all its nei
 }
 void World::refresh()
 {
+
     for (auto chunk : loadedChunks)
     {
         chunk.second->refreshChunk();
     }
+    std::cout << "Chunks refreshed\n";    
+
 }
-void World::update(glm::vec3 playerPosition)
+void World::update()
 {
-    glm::ivec2 position = getChunkPosition(playerPosition);
+    glm::ivec2 position = getChunkPosition(camera->position);
 
     if (position == lastPlayerPosition)
         return; // preventing to rereading chunks that were already loaded

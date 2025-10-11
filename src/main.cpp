@@ -52,7 +52,7 @@ int main()
     glfwSetMouseButtonCallback(window, IO::Input::mouseButtonsCallback);
 
     glfwMakeContextCurrent(window);
-    glfwSwapInterval(1); // Enable vsync
+    glfwSwapInterval(0); // Enable vsync
 
     // Initialize GL3W
     if (gl3wInit())
@@ -68,17 +68,18 @@ int main()
     }
     Blocks::initBlocks();
 
-    World world;
     // Blocks::Chunk chunk = Blocks::Chunk::generateFlatChunk(glm::ivec2(0,0),16);
     // auto& chunkMesh = chunk.getChunkMesh();
-
+    
     Graphics::Shader shader("resources/shaders/block.v.glsl", "resources/shaders/block.f.glsl");
     shader.compileShader();
     shader.bindShader();
+    
+    std::shared_ptr<IO::Freecam> camera = std::make_shared<IO::Freecam>(glm::vec3(0, 18, 0), -90.0f, 0.0f, 70.0f);
+    std::unique_ptr<World> world = std::make_unique<World>(camera,10);
 
-    IO::Freecam camera(glm::vec3(0, 18, 0), -90.0f, 0.0f, 70.0f);
-    glm::mat4 projection = glm::perspective(glm::radians(70.0f), 1280.0f / 720.0f, 0.1f, 100.0f);
-    glm::mat4 view = camera.getView();
+    glm::mat4 projection = glm::perspective(glm::radians(70.0f), 1280.0f / 720.0f, 0.1f, 10000.0f);
+    glm::mat4 view = camera->getView();
     glm::mat4 model = glm::mat4(1.0f);
 
     shader.setUniformMat4f("uProjection", projection);
@@ -93,7 +94,6 @@ int main()
     shader.setUniformf("uCellHeight", textureAtlas.getCellHeightRatio());
 
     // Main loop
-    glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 
     float lastFrame = 0.0f;
     float currentFrame = glfwGetTime();
@@ -101,8 +101,9 @@ int main()
     float sec = 0.0f;
     int frames = 0;
     bool cooldown = true;
+    bool firstRefresh = false;
 
-    world.create(camera.position);
+    world->create(world->getChunkPosition(camera->position));
     while (!glfwWindowShouldClose(window))
     {
         lastFrame = currentFrame;
@@ -112,30 +113,35 @@ int main()
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
         shader.bindShader();
-        shader.setUniformMat4f("uView", camera.getView());
+        shader.setUniformMat4f("uView", camera->getView());
 
-        world.render();
-        world.update(camera.position);
+        world->render();
+        world->update();
         if (IO::Input::isKeyDown(GLFW_KEY_F5) && cooldown)
         {
             cooldown = false;
-            world.refresh();
+            world->refresh();
         }
-
+        if(IO::Input::isButtonDown(GLFW_MOUSE_BUTTON_LEFT)){
+            glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+        }
         if (IO::Input::isKeyDown(GLFW_KEY_ESCAPE))
         {
             glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
-            break;
         }
         glfwSwapBuffers(window);
         glfwPollEvents();
 
-        camera.update();
+        camera->update();
 
         currentFrame = glfwGetTime();
         Time::DELTA_TIME = currentFrame - lastFrame;
         if (sec >= 1)
         {
+            if(!firstRefresh ){
+                firstRefresh = true;
+                world->refresh();
+            }
             std::string title = "Nanocraft FPS: " + std::to_string(frames);
             glfwSetWindowTitle(window, title.c_str());
             frames = 0;

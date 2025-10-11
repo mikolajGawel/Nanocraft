@@ -1,14 +1,17 @@
 #include "ChunkMesh.hpp"
 #include <GL/gl3w.h>
 #include <iostream>
-
+#define CHUNK_SIZE 16
+#define CHUNK_HEIGHT 256
 namespace Geom
 {
     ChunkMesh::ChunkMesh(): created(false), vao(0), vbo(0), ibo(0)
     {}
     void ChunkMesh::genBuffers(){
-        int chunkMaxVerticesSize = 16*16*256*sizeof(float)*6*24; // max size of chunk mesh
-        int chunkMaxIndicesSize = 16*16*256*sizeof(uint32_t)*36; // max size of chunk mesh
+        int chunkMaxVerticesSize = (CHUNK_SIZE*CHUNK_SIZE*CHUNK_HEIGHT*sizeof(float)*6*24)/2; // max size of chunk mesh 
+        int chunkMaxIndicesSize = (CHUNK_SIZE*CHUNK_SIZE*CHUNK_HEIGHT*sizeof(uint32_t)*36)/2; // max size of chunk mesh
+        //(everything is divided by 2 because cull faces can create whole chunk with all faces)
+
         glGenVertexArrays(1, &vao);
         glBindVertexArray(vao);
 
