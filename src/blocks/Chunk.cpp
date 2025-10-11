@@ -20,16 +20,16 @@ namespace Blocks
         throw std::runtime_error("Undefined ChunkDirection: " + direction);
         return NORTH;
     }
-    //if block is air(empty it returns false) 
+    // if block is air(empty it returns false)
     bool Chunk::checkBlock(int x, int y, int z)
     {
         if (y < 0 || y >= CHUNK_HEIGHT)
             return false;
-            
-        if (x >= 0 && x < CHUNK_SIZE && z >= 0 && z < CHUNK_SIZE)//check on chunk itself
+
+        if (x >= 0 && x < CHUNK_SIZE && z >= 0 && z < CHUNK_SIZE) // check on chunk itself
             return (!isBlockTransparent(blocks[getIndex(x, y, z)]));
 
-        if (z == CHUNK_SIZE && x >= 0 && x < CHUNK_SIZE)//check north neighbor
+        if (z == CHUNK_SIZE && x >= 0 && x < CHUNK_SIZE) // check north neighbor
         {
             if (auto north = neighbors[NORTH].lock())
             {
@@ -37,15 +37,15 @@ namespace Blocks
             }
             return false;
         }
-        if (z == -1 && x >= 0 && x < CHUNK_SIZE)//check south neighbord
+        if (z == -1 && x >= 0 && x < CHUNK_SIZE) // check south neighbord
         {
             if (auto south = neighbors[SOUTH].lock())
             {
-                return (!isBlockTransparent(south->blocks[getIndex(x, y, CHUNK_SIZE-1)]));
+                return (!isBlockTransparent(south->blocks[getIndex(x, y, CHUNK_SIZE - 1)]));
             }
             return false;
         }
-        if (x == CHUNK_SIZE && z >= 0 && z < CHUNK_SIZE)//check east neighbord
+        if (x == CHUNK_SIZE && z >= 0 && z < CHUNK_SIZE) // check east neighbord
         {
             if (auto east = neighbors[EAST].lock())
             {
@@ -53,11 +53,11 @@ namespace Blocks
             }
             return false;
         }
-        if (x == -1 && z >= 0 && z < CHUNK_SIZE)//check west neighbord
+        if (x == -1 && z >= 0 && z < CHUNK_SIZE) // check west neighbord
         {
             if (auto west = neighbors[WEST].lock())
             {
-                return (!isBlockTransparent(west->blocks[getIndex(CHUNK_SIZE-1, y, z)]));
+                return (!isBlockTransparent(west->blocks[getIndex(CHUNK_SIZE - 1, y, z)]));
             }
             return false;
         }
@@ -68,10 +68,10 @@ namespace Blocks
     Geom::SelectedFaces Chunk::getVisibleFaces(int x, int y, int z)
     {
         return Geom::SelectedFaces{
-            !checkBlock(x, y, z + 1),//north
-            !checkBlock(x, y, z - 1),//south
-            !checkBlock(x + 1, y, z),//east
-            !checkBlock(x - 1, y, z),//west
+            !checkBlock(x, y, z + 1), // north
+            !checkBlock(x, y, z - 1), // south
+            !checkBlock(x + 1, y, z), // east
+            !checkBlock(x - 1, y, z), // west
             !checkBlock(x, y + 1, z),
             !checkBlock(x, y - 1, z),
         };
@@ -89,9 +89,9 @@ namespace Blocks
     {
         blocks.fill(BLOCK_AIR);
     }
-    Chunk Chunk::generateFlatChunk(glm::ivec2 chunkPosition, uint8_t height)
+    std::shared_ptr<Chunk> Chunk::generateFlatChunk(glm::ivec2 chunkPosition, uint8_t height)
     {
-        Chunk result(chunkPosition);
+        auto result = std::make_shared<Chunk>(chunkPosition);
         for (int x = 0; x < CHUNK_SIZE; x++)
         {
             for (int z = 0; z < CHUNK_SIZE; z++)
@@ -99,16 +99,15 @@ namespace Blocks
                 for (int y = 0; y < height; y++)
                 {
                     if (y == height - 1)
-                        result.blocks[result.getIndex(x, y, z)] = BLOCK_GRASS;
+                        result->blocks[result->getIndex(x, y, z)] = BLOCK_GRASS;
                     else if (y > height / 2)
-                        result.blocks[result.getIndex(x, y, z)] = BLOCK_DIRT;
+                        result->blocks[result->getIndex(x, y, z)] = BLOCK_DIRT;
                     else
-                        result.blocks[result.getIndex(x, y, z)] = BLOCK_STONE;
+                        result->blocks[result->getIndex(x, y, z)] = BLOCK_STONE;
                 }
             }
         }
-        result.blocks[result.getIndex(0,height,0)] = BLOCK_STONE;
-        result.refreshChunk();
+        result->blocks[result->getIndex(0, height, 0)] = BLOCK_STONE;
         return result;
     }
     void Chunk::refreshChunk()
@@ -116,10 +115,13 @@ namespace Blocks
         auto mesh = getBlocksMesh();
         chunkMesh.setMesh(mesh);
     }
-    void Chunk::refreshChunkAndNeighbors(){
+    void Chunk::refreshChunkAndNeighbors()
+    {
         refreshChunk();
-        for(int i = 0;i < 4;i++){
-            if(auto neighbor = neighbors[i].lock()){
+        for (int i = 0; i < 4; i++)
+        {
+            if (auto neighbor = neighbors[i].lock())
+            {
                 neighbor->refreshChunk();
             }
         }
@@ -158,6 +160,16 @@ namespace Blocks
             return BLOCK_AIR;
         }
         return blocks[getIndex(x, y, z)];
+    }
+    int Chunk::chunkIndices()
+    {
+
+        return chunkMesh.getIndexCount();
+    }
+    void Chunk::bindChunkMesh()
+    {
+
+        chunkMesh.bind();
     }
     void Chunk::setNeighbor(std::weak_ptr<Chunk> neighbor, ChunkDirection direction)
     {

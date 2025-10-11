@@ -4,6 +4,7 @@
 #include <geom/ChunkMesh.hpp>
 #include <memory>
 #include <optional>
+#include <future>
 namespace Blocks
 {
     class Chunk
@@ -30,13 +31,14 @@ namespace Blocks
     public:
         glm::ivec2 chunkPosition; // chunk position in chunk coordinates
         Chunk(glm::ivec2 chunkPosition);
-        static Chunk generateFlatChunk(glm::ivec2 chunkPosition,uint8_t height);
+        static std::shared_ptr<Chunk> generateFlatChunk(glm::ivec2 chunkPosition,uint8_t height);
 
         BlockType getBlock(int x, int y, int z) const;
         void setBlock(int x, int y, int z, BlockType type);
         void refreshChunk();
         void refreshChunkAndNeighbors();
-        Geom::ChunkMesh& getChunkMesh(){ return chunkMesh; }
+        int chunkIndices();
+        void bindChunkMesh();
         void setNeighbor(std::weak_ptr<Chunk> neighbor,ChunkDirection direction);
     };
 } // namespace Blocks

@@ -39,7 +39,7 @@ int main()
 #endif
 
     // Create window
-    GLFWwindow *window = glfwCreateWindow(1280, 720, "Nanocraft: Morning_wood Edition", nullptr, nullptr);
+    GLFWwindow *window = glfwCreateWindow(1280, 720, "Nanocraft", nullptr, nullptr);
     if (!window)
     {
         std::cerr << "Failed to create GLFW window." << std::endl;
@@ -76,7 +76,7 @@ int main()
     shader.bindShader();
     
     std::shared_ptr<IO::Freecam> camera = std::make_shared<IO::Freecam>(glm::vec3(0, 18, 0), -90.0f, 0.0f, 70.0f);
-    std::unique_ptr<World> world = std::make_unique<World>(camera,10);
+    std::unique_ptr<World> world = std::make_unique<World>(camera,11);
 
     glm::mat4 projection = glm::perspective(glm::radians(70.0f), 1280.0f / 720.0f, 0.1f, 10000.0f);
     glm::mat4 view = camera->getView();
@@ -103,7 +103,7 @@ int main()
     bool cooldown = true;
     bool firstRefresh = false;
 
-    world->create(world->getChunkPosition(camera->position));
+    world->loadChunks(camera->position);
     while (!glfwWindowShouldClose(window))
     {
         lastFrame = currentFrame;
@@ -120,7 +120,7 @@ int main()
         if (IO::Input::isKeyDown(GLFW_KEY_F5) && cooldown)
         {
             cooldown = false;
-            world->refresh();
+            world->refresh({});
         }
         if(IO::Input::isButtonDown(GLFW_MOUSE_BUTTON_LEFT)){
             glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
@@ -140,7 +140,7 @@ int main()
         {
             if(!firstRefresh ){
                 firstRefresh = true;
-                world->refresh();
+                // world->refresh();
             }
             std::string title = "Nanocraft FPS: " + std::to_string(frames);
             glfwSetWindowTitle(window, title.c_str());
