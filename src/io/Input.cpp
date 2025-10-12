@@ -22,3 +22,14 @@ const bool Input::isKeyDown(int key) { return keys[key]; }
 const bool Input::isButtonDown(int button) { return buttons[button]; }
 const float Input::getMouseX() { return m_x; }
 const float Input::getMouseY() { return m_y; }
+float Input::getInputAxisForward(){
+    if (Input::isKeyDown(GLFW_KEY_W) && !Input::isKeyDown(GLFW_KEY_S)) return 1.0f;
+    else if (!Input::isKeyDown(GLFW_KEY_W) && Input::isKeyDown(GLFW_KEY_S)) return -1.0f;
+    return 0;
+}
+
+float Input::getInputAxisSideway(){
+    if (Input::isKeyDown(GLFW_KEY_A) && !Input::isKeyDown(GLFW_KEY_D)) return 1.0f;
+    else if (!Input::isKeyDown(GLFW_KEY_A) && Input::isKeyDown(GLFW_KEY_D)) return -1.0f;
+    return 0;
+}

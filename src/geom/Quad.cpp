@@ -8,16 +8,16 @@ namespace Geom{
 
     void Quad::init(){
         float vertices[16] = {
-            -1,-1,0,0,
-             1,-1,1,0,
-             1, 1,1,1,
-            -1, 1,0,1
+            -1*0.05,-1*0.1,0,0,
+             1*0.05,-1*0.1,1,0,
+             1*0.05, 1*0.1,1,1,
+            -1*0.05, 1*0.1,0,1
         };
         uint indices[6] = {
             0,1,2,
             2,3,0
         };
-
+        
         glGenVertexArrays(1, &vao);
         glBindVertexArray(vao);
 

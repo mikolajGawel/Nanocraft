@@ -4,8 +4,8 @@
 #include <stdexcept>
 #include <future>
 
-World::World(std::shared_ptr<Graphics::Camera> camera,uint8_t renderDistance):
-    camera(camera),renderDistance(renderDistance)
+World::World(uint8_t renderDistance):
+    renderDistance(renderDistance)
 {
 }
 World::~World()
@@ -91,6 +91,30 @@ void World::refresh(std::vector<glm::ivec2> chunksToRefresh)
     for(auto& f : future)
         f.get();  
 }
+Blocks::BlockType World::getBlock(glm::ivec3 coordinates){
+    glm::ivec2 chunkPos = getChunkPosition(coordinates);
+    glm::ivec3 inChunkPos = glm::mod(glm::vec3(coordinates),glm::vec3(Blocks::Chunk::CHUNK_SIZE,256,Blocks::Chunk::CHUNK_SIZE));
+    auto chunk = getChunk(chunkPos);
+    if(chunk){
+        return chunk.value()->getBlock(inChunkPos.x,inChunkPos.y,inChunkPos.z);
+    }
+    return Blocks::BLOCK_AIR;
+}
+void World::setBlock(glm::ivec3 position, Blocks::BlockType blockType){
+    glm::ivec2 chunkPos = getChunkPosition(position);
+    glm::ivec3 inChunkPos = glm::mod(glm::vec3(position),glm::vec3(Blocks::Chunk::CHUNK_SIZE,256,Blocks::Chunk::CHUNK_SIZE));
+    auto chunk = getChunk(chunkPos);
+    if(chunk){
+        chunk.value()->setBlock(inChunkPos.x,inChunkPos.y,inChunkPos.z,blockType);
+        // chunk.value()->refreshChunk();
+        // chunk.value()->refreshChunkAndNeighbors();
+
+    }
+
+}
+
+
+
 static bool isChunkInRange(glm::ivec2 center,int renderDistance,glm::ivec2 chunkPos){
     auto offset = glm::abs(center - chunkPos);
     return (offset.x <= renderDistance && offset.y <= renderDistance);
@@ -141,14 +165,14 @@ void World::loadChunks(glm::vec3 position)
     refresh(chunksRefreshQueue);
     //zrefreshuj nowe chunki
 }
-void World::update()
+void World::update(glm::vec3 position)
 {
-    glm::ivec2 position = getChunkPosition(camera->position);
+    glm::ivec2 _position = getChunkPosition(position);
 
-    if (position == lastPlayerPosition)
+    if (_position == lastPlayerPosition)
         return; // preventing to rereading chunks that were already loaded
-    lastPlayerPosition = position;
-    loadChunks(camera->position);
+    lastPlayerPosition = _position;
+    loadChunks(position);
 }
 glm::ivec2 World::getChunkPosition(glm::vec3 position)
 {
@@ -162,7 +186,7 @@ void World::render()
     {
         if(!isChunkInRange(lastPlayerPosition,renderDistance-1,iter.first))
             continue;
-        std::shared_ptr<Blocks::Chunk> chunk = iter.second;
+        std::shared_ptr<Blocks::Chunk>& chunk = iter.second;
         chunk->bindChunkMesh();
         glEnable(GL_CULL_FACE);
         glFrontFace(GL_CW);

@@ -16,10 +16,13 @@ add_executable(${PROJECT_NAME}
     src/geom/ChunkMesh.cpp
     src/geom/Quad.cpp
     src/world/World.cpp
+    src/util/Raycast.cpp
+    src/player/Player.cpp
     src/io/Input.cpp
     src/io/Freecam.cpp
     src/util/Time.cpp
     src/util/Math.cpp
+    src/world/Terrain.cpp
 )
 
 

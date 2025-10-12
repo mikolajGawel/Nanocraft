@@ -36,10 +36,13 @@ namespace Geom
         float* vertices = mesh.vertices.data();
         uint32_t* indices = mesh.indices.data();
 
-        glBindBuffer(GL_ARRAY_BUFFER, vbo);
-        glBufferSubData(GL_ARRAY_BUFFER, 0,sizeof(float)*mesh.vertices.size(),vertices); 
-        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ibo);
-        glBufferSubData(GL_ELEMENT_ARRAY_BUFFER, 0,sizeof(uint32_t)*mesh.indices.size(),indices); 
+glBindBuffer(GL_ARRAY_BUFFER, vbo);
+glBufferData(GL_ARRAY_BUFFER, sizeof(float) * mesh.vertices.size(), vertices, GL_DYNAMIC_DRAW);
+
+glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ibo);
+glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(uint32_t) * mesh.indices.size(), indices, GL_DYNAMIC_DRAW);
+ 
+
         glBindVertexArray(vao);
     }
 

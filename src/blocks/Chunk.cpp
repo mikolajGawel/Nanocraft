@@ -80,7 +80,7 @@ namespace Blocks
     {
         if (x < 0 || x >= CHUNK_SIZE || y < 0 || y >= CHUNK_HEIGHT || z < 0 || z >= CHUNK_SIZE)
         {
-            std::cerr << "Chunk::getIndex out of bounds: " << x << " " << y << " " << z << std::endl;
+            std::cout << "Chunk::getIndex out of bounds: " << x << " " << y << " " << z << std::endl;
             return 0;
         }
         return x + CHUNK_SIZE * (z + CHUNK_SIZE * y);
@@ -117,7 +117,6 @@ namespace Blocks
     }
     void Chunk::refreshChunkAndNeighbors()
     {
-        refreshChunk();
         for (int i = 0; i < 4; i++)
         {
             if (auto neighbor = neighbors[i].lock())
@@ -125,6 +124,7 @@ namespace Blocks
                 neighbor->refreshChunk();
             }
         }
+        refreshChunk();
     }
     Geom::BasicMesh Chunk::getBlocksMesh()
     {
@@ -135,15 +135,15 @@ namespace Blocks
             {
                 for (int y = 0; y < CHUNK_HEIGHT; y++)
                 {
-                    if (blocks[getIndex(x, y, z)] > 0)
+                    if (blocks[getIndex(x, y, z)] != BLOCK_AIR)
                     {
                         Geom::SelectedFaces visibleFaces = getVisibleFaces(x, y, z);
                         Block block = BLOCKS[blocks[getIndex(x, y, z)]];
                         glm::vec3 worldPos = glm::vec3(
                             x + chunkPosition.x * CHUNK_SIZE,
                             y,
-                            z + chunkPosition.y * CHUNK_SIZE);
-
+                            z + chunkPosition.y * CHUNK_SIZE) ;
+                        worldPos += glm::vec3(0.5f, 0.5f, 0.5f);
                         Geom::BasicMesh newBlock = Geom::generateBlockMesh(worldPos, visibleFaces, block.textures);
                         blocksMeshes.push_back(newBlock);
                     }
@@ -152,6 +152,11 @@ namespace Blocks
         }
         return mergeMeshes(blocksMeshes);
     }
+    void Chunk::setBlock(int x, int y, int z, BlockType type){
+        blocks[getIndex(x,y,z)] = type;
+        refreshChunkAndNeighbors();
+    }
+
     BlockType Chunk::getBlock(int x, int y, int z) const
     {
         if (x < 0 || x >= CHUNK_SIZE || y < 0 || y >= CHUNK_HEIGHT || z < 0 || z >= CHUNK_SIZE)

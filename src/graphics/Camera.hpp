@@ -16,6 +16,7 @@ namespace Graphics
         glm::mat4 getView();
         float getPitch();
         float getYaw();
+        glm::vec3 getFront();
     };
 } // namespace Engine::Graphics
 

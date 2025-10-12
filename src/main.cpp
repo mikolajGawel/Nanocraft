@@ -12,6 +12,7 @@
 #include "blocks/Chunk.hpp"
 #include <glm/gtc/matrix_transform.hpp>
 #include "world/World.hpp"
+#include "player/Player.hpp"
 void errorCallback(int error, const char *description)
 {
     std::cerr << "GLFW Error (" << error << "): " << description << std::endl;
@@ -29,7 +30,6 @@ int main()
         return -1;
     }
 
-    // Set OpenGL version (3.3 Core)
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
@@ -66,17 +66,19 @@ int main()
         std::cerr << "OpenGL 3.3 not supported." << std::endl;
         return -1;
     }
+    glViewport(0,0,1280,720);
     Blocks::initBlocks();
+    Geom::Quad::init();
 
-    // Blocks::Chunk chunk = Blocks::Chunk::generateFlatChunk(glm::ivec2(0,0),16);
-    // auto& chunkMesh = chunk.getChunkMesh();
-    
     Graphics::Shader shader("resources/shaders/block.v.glsl", "resources/shaders/block.f.glsl");
     shader.compileShader();
     shader.bindShader();
     
-    std::shared_ptr<IO::Freecam> camera = std::make_shared<IO::Freecam>(glm::vec3(0, 18, 0), -90.0f, 0.0f, 70.0f);
-    std::unique_ptr<World> world = std::make_unique<World>(camera,11);
+    Graphics::Shader uiShader("resources/shaders/uishader.v.glsl", "resources/shaders/uishader.f.glsl");
+    uiShader.compileShader();
+
+    std::shared_ptr<Player> camera = std::make_shared<Player>(glm::vec3(0, 18, 0), -90.0f, 0.0f, 70.0f);
+    std::unique_ptr<World> world = std::make_unique<World>(11);
 
     glm::mat4 projection = glm::perspective(glm::radians(70.0f), 1280.0f / 720.0f, 0.1f, 10000.0f);
     glm::mat4 view = camera->getView();
@@ -101,7 +103,6 @@ int main()
     float sec = 0.0f;
     int frames = 0;
     bool cooldown = true;
-    bool firstRefresh = false;
 
     world->loadChunks(camera->position);
     while (!glfwWindowShouldClose(window))
@@ -116,7 +117,7 @@ int main()
         shader.setUniformMat4f("uView", camera->getView());
 
         world->render();
-        world->update();
+        world->update(camera->position);
         if (IO::Input::isKeyDown(GLFW_KEY_F5) && cooldown)
         {
             cooldown = false;
@@ -129,19 +130,20 @@ int main()
         {
             glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
         }
+ 
+        uiShader.bindShader();
+        Geom::Quad::draw();
+
         glfwSwapBuffers(window);
         glfwPollEvents();
 
-        camera->update();
+        camera->update(*world);
 
+        
         currentFrame = glfwGetTime();
         Time::DELTA_TIME = currentFrame - lastFrame;
         if (sec >= 1)
         {
-            if(!firstRefresh ){
-                firstRefresh = true;
-                // world->refresh();
-            }
             std::string title = "Nanocraft FPS: " + std::to_string(frames);
             glfwSetWindowTitle(window, title.c_str());
             frames = 0;

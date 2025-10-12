@@ -14,6 +14,9 @@ namespace IO
 		static const bool isButtonDown(int button);
 		static const float getMouseX();
 		static const float getMouseY();
+		
+		static float getInputAxisForward();// returns value from axis W and S x ={-1;0;1}
+		static float getInputAxisSideway();// returns value from axis A and D x ={-1;0;1}
 	};
 } // namespace IO
 
