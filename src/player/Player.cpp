@@ -82,21 +82,32 @@ void Player::movement()
     acceleration = glm::vec3(0.0f);
 }
 static bool destroy_pressed = false;
-
+static bool place_pressed = false;
 
 void Player::action(World &world)
 {
+    //destroying block
     if (destroy_pressed == false && Input::isButtonDown(GLFW_MOUSE_BUTTON_1))
     {
         auto ray = Raycast::raycast(front,position,5,world);
         if(ray){
             glm::ivec3 blockToDestroy = ray->blockPos;
-            std::cout << "x: " << blockToDestroy.x <<" y: " << blockToDestroy.y << " z: " << blockToDestroy.z << std::endl;
-            std::cout << "dir: " << Raycast::blockSideToString(ray->blockSide) << std::endl;
             world.setBlock(blockToDestroy,Blocks::BLOCK_AIR);
         } 
     }
     destroy_pressed = Input::isButtonDown(GLFW_MOUSE_BUTTON_1);
+    //placing block
+    if (place_pressed == false && Input::isButtonDown(GLFW_MOUSE_BUTTON_2))
+    {
+        auto ray = Raycast::raycast(front,position,5,world);
+        if(ray){
+            glm::ivec3 castedBlockPos = ray->blockPos;
+            glm::ivec3 positionToPlaceBlock = castedBlockPos - Raycast::sideToCoordinates(ray->blockSide);
+            if(world.getBlock(positionToPlaceBlock) == Blocks::BLOCK_AIR)
+                world.setBlock(positionToPlaceBlock,Blocks::BLOCK_STONE);
+        } 
+    }
+    place_pressed = Input::isButtonDown(GLFW_MOUSE_BUTTON_2);
 }
 void Player::update(World &world)
 {

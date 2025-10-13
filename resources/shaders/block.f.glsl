@@ -4,6 +4,7 @@ out vec4 FragColor;
 in vec2 texCoords;
 in float texIndex;
 in vec3 normal;
+
 uniform sampler2D uTex;
 uniform float uCellWidth;
 uniform float uCellHeight;
@@ -22,6 +23,12 @@ void main()
 
     vec2 coords =  offset + texCoords * cellSize;
 
-    vec3 abs_norm = abs(normal);
-    FragColor = texture(uTex,coords) - vec4(abs_norm*vec3(0.07),1.0);
+    //added small level of static lights for better blocks visibility
+    vec3 lightPos = vec3(1,1,1);
+    float ambient = 0.5;
+    vec3 lightDir = normalize(lightPos - vec3(0.0));
+    float diff= max(dot(normal,lightDir),0.0);
+
+    vec4 color = vec4(min(ambient+diff,1.0));
+    FragColor = texture(uTex,coords) * color;
 }

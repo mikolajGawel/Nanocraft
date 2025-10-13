@@ -31,7 +31,6 @@ namespace Raycast
         int safe = 30;
         while (safe > 0)
         {
-            BlockSide lastSide = side;
             if (sideDist.x <= sideDist.y && sideDist.x <= sideDist.z)
             {
                 sideDist.x += delta.x;
@@ -57,7 +56,7 @@ namespace Raycast
                 return (RaycastHit){
                     currMapPos,
                     hit,
-                    lastSide};
+                    side};
             }
             safe--;
         }
@@ -83,4 +82,16 @@ namespace Raycast
             return "UNKNOWN";
         }
     }
+    static const glm::ivec3 sideCoordinates[] ={
+        glm::ivec3(0,0,1),
+        glm::ivec3(0,0,-1),
+        glm::ivec3(1,0,0),
+        glm::ivec3(-1,0,0),
+        glm::ivec3(0,1,0),
+        glm::ivec3(0,-1,0),
+    };
+    glm::ivec3 sideToCoordinates(BlockSide side){
+        return sideCoordinates[side];
+    }
+
 } // namespace Raycast

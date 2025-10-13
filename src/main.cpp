@@ -17,6 +17,13 @@ void errorCallback(int error, const char *description)
 {
     std::cerr << "GLFW Error (" << error << "): " << description << std::endl;
 }
+int windowWidth = 1280,windowHeight = 720;
+void sizeCallback(GLFWwindow* window,int width,int height)
+{
+    windowWidth = width;
+    windowHeight = height;
+    glViewport(0,0,width,height);
+}
 
 int main()
 {
@@ -50,6 +57,7 @@ int main()
     glfwSetCursorPosCallback(window, IO::Input::mousePositionCallback);
     glfwSetKeyCallback(window, IO::Input::keyCallback);
     glfwSetMouseButtonCallback(window, IO::Input::mouseButtonsCallback);
+    glfwSetWindowSizeCallback(window, sizeCallback);
 
     glfwMakeContextCurrent(window);
     glfwSwapInterval(1); // Enable vsync
@@ -66,7 +74,6 @@ int main()
         std::cerr << "OpenGL 3.3 not supported." << std::endl;
         return -1;
     }
-    glViewport(0,0,1280,720);
     Blocks::initBlocks();
     Geom::Quad::init();
 
@@ -80,11 +87,9 @@ int main()
     std::shared_ptr<Player> camera = std::make_shared<Player>(glm::vec3(0, 20, 0), -90.0f, 0.0f, 70.0f);
     std::unique_ptr<World> world = std::make_unique<World>(20);
 
-    glm::mat4 projection = glm::perspective(glm::radians(70.0f), 1280.0f / 720.0f, 0.1f, 10000.0f);
     glm::mat4 view = camera->getView();
     glm::mat4 model = glm::mat4(1.0f);
 
-    shader.setUniformMat4f("uProjection", projection);
     shader.setUniformMat4f("uView", view);
     shader.setUniformMat4f("uModel", model);
 
@@ -115,6 +120,8 @@ int main()
 
         shader.bindShader();
         shader.setUniformMat4f("uView", camera->getView());
+        glm::mat4 projection = glm::perspective(glm::radians(70.0f), (float)windowWidth / (float)windowHeight, 0.1f, 10000.0f);
+        shader.setUniformMat4f("uProjection", projection);
 
         world->render();
         world->update(camera->position);

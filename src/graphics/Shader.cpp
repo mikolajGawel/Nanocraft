@@ -82,6 +82,15 @@ void Shader::setUniformf(const std::string &name, float value) {
         glUniform1f(location, value);
     }
 }
+void Shader::setUniformVec3(const std::string &name, glm::vec3 vec3){
+    int location = glGetUniformLocation(shaderProgram, name.c_str());
+    if (location == -1) {
+        std::cerr << "Warning: uniform '" << name << "' doesn't exist or is not used in shader program.\n";
+    } else {
+        glUniform3f(location, vec3.x, vec3.y, vec3.z);
+    }
+}
+
 void Shader::setUniformMat4f(const std::string &name, glm::mat4 matrix) {
     int location = glGetUniformLocation(shaderProgram, name.c_str());
     if (location == -1) {
