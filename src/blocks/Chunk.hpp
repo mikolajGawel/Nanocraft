@@ -28,6 +28,7 @@ namespace Blocks
         Geom::ChunkMesh chunkMesh;
         std::array<BlockType, CHUNK_SIZE * CHUNK_HEIGHT * CHUNK_SIZE> blocks;
         size_t getIndex(int x, int y, int z) const;
+        void refreshNeighborIfExists(ChunkDirection direction);
     public:
         glm::ivec2 chunkPosition; // chunk position in chunk coordinates
         Chunk(glm::ivec2 chunkPosition);

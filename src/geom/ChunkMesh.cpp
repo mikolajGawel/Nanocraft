@@ -33,11 +33,7 @@ namespace Geom
         glBufferData(GL_ELEMENT_ARRAY_BUFFER, chunkMaxIndicesSize, nullptr, GL_DYNAMIC_DRAW);
         created = true;
     }
-    void ChunkMesh::bind()
-    {
-        if (!created)
-            genBuffers();
-
+    void ChunkMesh::uploadValues(){
         glBindVertexArray(vao);
 
         glBindBuffer(GL_ARRAY_BUFFER, vbo);
@@ -45,6 +41,16 @@ namespace Geom
 
         glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ibo);
         glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(uint32_t) * mesh.indices.size(), mesh.indices.data(), GL_DYNAMIC_DRAW);
+
+        uploaded = true;
+    }
+    void ChunkMesh::bind()
+    {
+        if (!created)
+            genBuffers();
+        if(!uploaded)uploadValues();
+        glBindVertexArray(vao);
+
     }
 
 } // namespace Geom

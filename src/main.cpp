@@ -78,7 +78,7 @@ int main()
     uiShader.compileShader();
 
     std::shared_ptr<Player> camera = std::make_shared<Player>(glm::vec3(0, 18, 0), -90.0f, 0.0f, 70.0f);
-    std::unique_ptr<World> world = std::make_unique<World>(11);
+    std::unique_ptr<World> world = std::make_unique<World>(16);
 
     glm::mat4 projection = glm::perspective(glm::radians(70.0f), 1280.0f / 720.0f, 0.1f, 10000.0f);
     glm::mat4 view = camera->getView();

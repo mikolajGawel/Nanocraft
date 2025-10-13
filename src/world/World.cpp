@@ -106,8 +106,6 @@ void World::setBlock(glm::ivec3 position, Blocks::BlockType blockType){
     auto chunk = getChunk(chunkPos);
     if(chunk){
         chunk.value()->setBlock(inChunkPos.x,inChunkPos.y,inChunkPos.z,blockType);
-        // chunk.value()->refreshChunk();
-        // chunk.value()->refreshChunkAndNeighbors();
 
     }
 
@@ -184,8 +182,6 @@ void World::render()
 {
     for (auto &iter : loadedChunks)
     {
-        if(!isChunkInRange(lastPlayerPosition,renderDistance-1,iter.first))
-            continue;
         std::shared_ptr<Blocks::Chunk>& chunk = iter.second;
         chunk->bindChunkMesh();
         glEnable(GL_CULL_FACE);

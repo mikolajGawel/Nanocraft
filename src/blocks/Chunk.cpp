@@ -80,11 +80,21 @@ namespace Blocks
     {
         if (x < 0 || x >= CHUNK_SIZE || y < 0 || y >= CHUNK_HEIGHT || z < 0 || z >= CHUNK_SIZE)
         {
-            std::cout << "Chunk::getIndex out of bounds: " << x << " " << y << " " << z << std::endl;
+            std::cerr << "Chunk::getIndex out of bounds: " << x << " " << y << " " << z << std::endl;
+            // throw std::runtime_error("Chunk::getIndex out of bounds");
+
             return 0;
         }
         return x + CHUNK_SIZE * (z + CHUNK_SIZE * y);
     }
+    void Chunk::refreshNeighborIfExists(ChunkDirection direction)
+    {
+        if (auto neighbor = neighbors[static_cast<int>(direction)].lock())
+        {
+            neighbor->refreshChunk();
+        }
+    }
+
     Chunk::Chunk(glm::ivec2 chunkPosition) : chunkPosition(chunkPosition)
     {
         blocks.fill(BLOCK_AIR);
@@ -112,16 +122,13 @@ namespace Blocks
     void Chunk::refreshChunk()
     {
         auto mesh = getBlocksMesh();
-        chunkMesh.setMesh(mesh); 
+        chunkMesh.setMesh(mesh);
     }
     void Chunk::refreshChunkAndNeighbors()
     {
         for (int i = 0; i < 4; i++)
         {
-            if (auto neighbor = neighbors[i].lock())
-            {
-                neighbor->refreshChunk();
-            }
+            refreshNeighborIfExists(static_cast<ChunkDirection>(i));
         }
         refreshChunk();
     }
@@ -141,7 +148,7 @@ namespace Blocks
                         glm::vec3 worldPos = glm::vec3(
                             x + chunkPosition.x * CHUNK_SIZE,
                             y,
-                            z + chunkPosition.y * CHUNK_SIZE) ;
+                            z + chunkPosition.y * CHUNK_SIZE);
                         worldPos += glm::vec3(0.5f, 0.5f, 0.5f);
                         Geom::BasicMesh newBlock = Geom::generateBlockMesh(worldPos, visibleFaces, block.textures);
                         blocksMeshes.push_back(newBlock);
@@ -151,9 +158,16 @@ namespace Blocks
         }
         return mergeMeshes(blocksMeshes);
     }
-    void Chunk::setBlock(int x, int y, int z, BlockType type){
-        blocks[getIndex(x,y,z)] = type;
-        refreshChunkAndNeighbors();
+    void Chunk::setBlock(int x, int y, int z, BlockType type)
+    {
+        blocks[getIndex(x, y, z)] = type;
+        refreshChunk();
+        if (x == 0)refreshNeighborIfExists(WEST);
+        else if (x == CHUNK_SIZE - 1)refreshNeighborIfExists(EAST);
+
+        if (z == 0)refreshNeighborIfExists(SOUTH);
+        else if (z == CHUNK_SIZE - 1)refreshNeighborIfExists(NORTH);
+
     }
 
     BlockType Chunk::getBlock(int x, int y, int z) const
