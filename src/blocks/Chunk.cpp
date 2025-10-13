@@ -99,6 +99,28 @@ namespace Blocks
     {
         blocks.fill(BLOCK_AIR);
     }
+    std::shared_ptr<Chunk> Chunk::generateChunkFromTerrain(glm::ivec2 chunkPosition,Terrain terrain){
+        auto result = std::make_shared<Chunk>(chunkPosition);
+        for (int x = 0; x < CHUNK_SIZE; x++)
+        {
+            for (int z = 0; z < CHUNK_SIZE; z++)
+            {
+                
+                int height = terrain.getTerrainHeight(x + CHUNK_SIZE * chunkPosition.x,z + CHUNK_SIZE * chunkPosition.y);
+                for (int y = 0; y < height; y++)
+                {
+                    if (y == height - 1)
+                        result->blocks[result->getIndex(x, y, z)] = BLOCK_GRASS;
+                    else if (y > height / 2)
+                        result->blocks[result->getIndex(x, y, z)] = BLOCK_DIRT;
+                    else
+                        result->blocks[result->getIndex(x, y, z)] = BLOCK_STONE;
+                }
+            }
+        }
+        return result;
+    }
+
     std::shared_ptr<Chunk> Chunk::generateFlatChunk(glm::ivec2 chunkPosition, uint8_t height)
     {
         auto result = std::make_shared<Chunk>(chunkPosition);

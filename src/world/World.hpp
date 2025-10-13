@@ -3,6 +3,7 @@
 #include <memory>
 #include <unordered_map>
 #include <future>
+#include "gen/Terrain.hpp"
 class World
 {
 private:
@@ -22,7 +23,7 @@ private:
     void checkChunkNeighbors(glm::ivec2 chunkPosition,bool appendToNeighbor = false);
     uint8_t renderDistance = 4;
     glm::ivec2 getChunkPosition(glm::vec3 position);
-
+    Terrain terrain;
     public:
     World(uint8_t renderDistance);
     ~World();

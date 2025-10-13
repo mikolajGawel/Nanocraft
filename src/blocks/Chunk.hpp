@@ -5,6 +5,7 @@
 #include <memory>
 #include <optional>
 #include <future>
+#include <world/gen/Terrain.hpp>
 namespace Blocks
 {
     class Chunk
@@ -32,6 +33,7 @@ namespace Blocks
     public:
         glm::ivec2 chunkPosition; // chunk position in chunk coordinates
         Chunk(glm::ivec2 chunkPosition);
+        static std::shared_ptr<Chunk> generateChunkFromTerrain(glm::ivec2 chunkPosition,Terrain terrain);
         static std::shared_ptr<Chunk> generateFlatChunk(glm::ivec2 chunkPosition,uint8_t height);
 
         BlockType getBlock(int x, int y, int z) const;

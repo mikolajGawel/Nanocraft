@@ -19,7 +19,7 @@ namespace Geom
             merged.indices.push_back(i + offset);
         }
         merged.vertices.insert(merged.vertices.end(), mesh.vertices.begin(), mesh.vertices.end());
-        offset += mesh.vertices.size() / 6;
+        offset += mesh.vertices.size() / 7;
     }
     return merged;
 }

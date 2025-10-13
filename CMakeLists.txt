@@ -22,7 +22,7 @@ add_executable(${PROJECT_NAME}
     src/io/Freecam.cpp
     src/util/Time.cpp
     src/util/Math.cpp
-    src/world/Terrain.cpp
+    src/world/gen/Terrain.cpp
 )
 
 

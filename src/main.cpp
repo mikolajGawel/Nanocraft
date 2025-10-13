@@ -52,7 +52,7 @@ int main()
     glfwSetMouseButtonCallback(window, IO::Input::mouseButtonsCallback);
 
     glfwMakeContextCurrent(window);
-    glfwSwapInterval(0); // Enable vsync
+    glfwSwapInterval(1); // Enable vsync
 
     // Initialize GL3W
     if (gl3wInit())
@@ -77,8 +77,8 @@ int main()
     Graphics::Shader uiShader("resources/shaders/uishader.v.glsl", "resources/shaders/uishader.f.glsl");
     uiShader.compileShader();
 
-    std::shared_ptr<Player> camera = std::make_shared<Player>(glm::vec3(0, 18, 0), -90.0f, 0.0f, 70.0f);
-    std::unique_ptr<World> world = std::make_unique<World>(16);
+    std::shared_ptr<Player> camera = std::make_shared<Player>(glm::vec3(0, 20, 0), -90.0f, 0.0f, 70.0f);
+    std::unique_ptr<World> world = std::make_unique<World>(20);
 
     glm::mat4 projection = glm::perspective(glm::radians(70.0f), 1280.0f / 720.0f, 0.1f, 10000.0f);
     glm::mat4 view = camera->getView();
@@ -131,9 +131,7 @@ int main()
             glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
         }
  
-        uiShader.bindShader();
-        Geom::Quad::draw();
-
+        
         glfwSwapBuffers(window);
         glfwPollEvents();
 

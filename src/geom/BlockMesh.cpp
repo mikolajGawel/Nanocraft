@@ -87,13 +87,13 @@ namespace Geom
                 continue;
 
             Geom::BlockFace face = blockFaces.at(i);
-            int offset = vertices.size() / 6;
+            int offset = vertices.size() / BlockFace::BlockFaceStride();
 
             for (uint i : face.indices)
             {
                 indices.push_back(i + offset);
             }
-            auto faceVertices = face.getVerticesArray(position, textureArray.at(i));
+            auto faceVertices = face.getVerticesArray(position, textureArray.at(i), i);
             vertices.insert(vertices.end(), faceVertices.begin(), faceVertices.end());
         }
         return {vertices, indices};

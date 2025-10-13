@@ -5,7 +5,7 @@
 #include <future>
 
 World::World(uint8_t renderDistance):
-    renderDistance(renderDistance)
+    renderDistance(renderDistance),terrain(Terrain(12,{20.0f,0.02f,6}))
 {
 }
 World::~World()
@@ -137,7 +137,7 @@ void World::loadChunks(glm::vec3 position)
             auto currChunk = loadedChunks.find(offsetPos);
 
             if (currChunk != loadedChunks.end()){continue;}//if found chunk already on this pos then skip
-            futureChunks.push_back(std::async(std::launch::async,Blocks::Chunk::generateFlatChunk,offsetPos,16));    
+            futureChunks.push_back(std::async(std::launch::async,Blocks::Chunk::generateChunkFromTerrain,offsetPos,terrain));    
         }
     }
     std::vector<glm::ivec2> chunkPositions = {};

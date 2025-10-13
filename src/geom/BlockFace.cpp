@@ -3,7 +3,7 @@ Geom::BlockFace::BlockFace(std::array<Geom::Vertex, 4> vertices, std::array<uint
     : vertices(vertices), indices(indices)
 {
 }
-std::vector<float> Geom::BlockFace::getVerticesArray(glm::vec3 blockPosition, uint textureID)
+std::vector<float> Geom::BlockFace::getVerticesArray(glm::vec3 blockPosition, uint textureID,unsigned int sideID)
 {
     std::vector<float> result = {};
     for (Geom::Vertex vertex : vertices)
@@ -15,6 +15,7 @@ std::vector<float> Geom::BlockFace::getVerticesArray(glm::vec3 blockPosition, ui
         result.push_back(vertex.textureCoordinates.x);
         result.push_back(vertex.textureCoordinates.y);
         result.push_back(textureID);
+        result.push_back(sideID);
     }
     return result;
 }

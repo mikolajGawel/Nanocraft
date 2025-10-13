@@ -10,7 +10,7 @@ namespace Geom
     }
     void ChunkMesh::genBuffers()
     {
-        int chunkMaxVerticesSize = (CHUNK_SIZE * CHUNK_SIZE * CHUNK_HEIGHT * sizeof(float) * 6 * 24) / 2; // max size of chunk mesh
+        int chunkMaxVerticesSize = (CHUNK_SIZE * CHUNK_SIZE * CHUNK_HEIGHT * sizeof(float) * 7 * 24) / 2; // max size of chunk mesh
         int chunkMaxIndicesSize = (CHUNK_SIZE * CHUNK_SIZE * CHUNK_HEIGHT * sizeof(uint32_t) * 36) / 2;   // max size of chunk mesh
         //(everything is divided by 2 because cull faces can create whole chunk with all faces)
 
@@ -22,11 +22,13 @@ namespace Geom
         glBufferData(GL_ARRAY_BUFFER, chunkMaxVerticesSize, nullptr, GL_DYNAMIC_DRAW);
 
         glEnableVertexAttribArray(0);
-        glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(float) * 6, (void *)(0));
+        glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(float) * 7, (void *)(0));
         glEnableVertexAttribArray(1);
-        glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, sizeof(float) * 6, (void *)(sizeof(float) * 3));
+        glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, sizeof(float) * 7, (void *)(sizeof(float) * 3));
         glEnableVertexAttribArray(2);
-        glVertexAttribPointer(2, 1, GL_FLOAT, GL_FALSE, sizeof(float) * 6, (void *)(sizeof(float) * 5));
+        glVertexAttribPointer(2, 1, GL_FLOAT, GL_FALSE, sizeof(float) * 7, (void *)(sizeof(float) * 5));
+        glEnableVertexAttribArray(3);
+        glVertexAttribPointer(3, 1, GL_FLOAT, GL_FALSE, sizeof(float) * 7, (void *)(sizeof(float) * 6));
 
         glGenBuffers(1, &ibo);
         glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ibo);

@@ -3,7 +3,7 @@ out vec4 FragColor;
 
 in vec2 texCoords;
 in float texIndex;
-
+in vec3 normal;
 uniform sampler2D uTex;
 uniform float uCellWidth;
 uniform float uCellHeight;
@@ -22,5 +22,6 @@ void main()
 
     vec2 coords =  offset + texCoords * cellSize;
 
-    FragColor = texture(uTex,coords);
+    vec3 abs_norm = abs(normal);
+    FragColor = texture(uTex,coords) - vec4(abs_norm*vec3(0.07),1.0);
 }
