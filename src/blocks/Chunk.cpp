@@ -107,13 +107,12 @@ namespace Blocks
                 }
             }
         }
-        result->blocks[result->getIndex(0, height, 0)] = BLOCK_STONE;
         return result;
     }
     void Chunk::refreshChunk()
     {
         auto mesh = getBlocksMesh();
-        chunkMesh.setMesh(mesh);
+        chunkMesh.setMesh(mesh); 
     }
     void Chunk::refreshChunkAndNeighbors()
     {

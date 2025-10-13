@@ -19,7 +19,7 @@ namespace Blocks
             WEST = 3
         };
         static ChunkDirection getOpositeChunkDirection(ChunkDirection direction);
-    private:
+    private: 
         std::array<std::weak_ptr<Chunk>,4> neighbors;
         bool checkBlock(int x,int y,int z);
         Geom::SelectedFaces getVisibleFaces(int x,int y,int z);
