@@ -37,6 +37,10 @@ void Texture::loadTexture(){
 	glGenerateMipmap(GL_TEXTURE_2D);
     glBindTexture(GL_TEXTURE_2D,0);
 }
+#include <iostream>
 unsigned int Texture::getTexureID(){
+	if(textureID == 0){
+		std::cerr << "Texture: " << texturePath << " is not loaded\n";
+	}
     return textureID;
 }

@@ -2,6 +2,7 @@
 #include <GL/gl3w.h>
 
 namespace Geom{
+    static bool quadInitialized = false;
     unsigned int Quad::vao = 0;
     unsigned int Quad::vbo = 0;
     unsigned int Quad::ibo = 0;
@@ -33,8 +34,11 @@ namespace Geom{
         glGenBuffers(1, &ibo);
         glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ibo);
         glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
+        quadInitialized = true;
     }
     void Quad::bind(){
+        if(!quadInitialized)
+            init();
         glBindVertexArray(vao);
         glBindBuffer(GL_ELEMENT_ARRAY_BUFFER,ibo);
     }

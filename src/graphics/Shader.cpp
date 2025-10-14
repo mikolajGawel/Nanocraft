@@ -41,7 +41,6 @@ uint createShader(int type,std::string path){
     return shader;
 }
 
-
 void Shader::compileShader(){
     uint vertex = createShader(GL_VERTEX_SHADER,vertexShaderPath);
     uint fragment = createShader(GL_FRAGMENT_SHADER,fragmentShaderPath);

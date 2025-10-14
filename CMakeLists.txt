@@ -23,6 +23,8 @@ add_executable(${PROJECT_NAME}
     src/util/Time.cpp
     src/util/Math.cpp
     src/world/gen/Terrain.cpp
+    src/io/Window.cpp
+    src/Game.cpp
 )
 
 

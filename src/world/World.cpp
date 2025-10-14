@@ -188,9 +188,8 @@ void World::render()
         glFrontFace(GL_CW);
         glCullFace(GL_BACK);
 
-        // glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
         glDrawElements(GL_TRIANGLES, chunk->chunkIndices(), GL_UNSIGNED_INT, 0);
-        // glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+
         glDisable(GL_CULL_FACE);
     }
 }
