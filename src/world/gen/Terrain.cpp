@@ -20,6 +20,9 @@ int Terrain::getTerrainHeight(int x,int y){
 }
 Terrain::TerrainDecoration Terrain::getTerrainDecoration(int x,int y){
     float result = Noise::perlin(seed,x, y);
-    int i = floor(abs(result*3));
-    return (i == 2 ) ? GRASS : NONE;
+    int i = floor(abs(result*15));
+    if(i == 14 ) return FLOWER2;
+    if(i == 13 ) return FLOWER1;
+    if(i > 7) return GRASS;
+    return NONE;
 }

@@ -10,9 +10,11 @@ public:
         float frequency;
         int octaves;
     };
-    enum TerrainDecoration{
+    enum TerrainDecoration: uint8_t{
         NONE = Blocks::BLOCK_AIR,
-        GRASS = Blocks::PLANT_GRASS
+        GRASS = Blocks::PLANT_GRASS,
+        FLOWER1 = Blocks::PLANT_FLOWER1,
+        FLOWER2 = Blocks::PLANT_FLOWER2
     };
 private:
     unsigned int seed;

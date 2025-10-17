@@ -119,8 +119,8 @@ namespace Blocks
 
                 }
                 Terrain::TerrainDecoration deco = terrain.getTerrainDecoration(x + CHUNK_SIZE * chunkPosition.x,z + CHUNK_SIZE * chunkPosition.y);
-                if(deco == Terrain::GRASS){
-                    result->blocks[result->getIndex(x,height,z)] = Blocks::PLANT_GRASS;
+                if(deco != Terrain::NONE && result->blocks[result->getIndex(x,height-1,z)] == BLOCK_GRASS){
+                    result->blocks[result->getIndex(x,height,z)] = static_cast<BlockType>(deco);
                 }
             }
         }
@@ -202,6 +202,9 @@ namespace Blocks
     void Chunk::setBlock(int x, int y, int z, BlockType type)
     {
         blocks[getIndex(x, y, z)] = type;
+        if(BLOCKS[blocks[getIndex(x, y+1, z)]].blockMeshType == BlockMesh::PLANT_MESH){
+            blocks[getIndex(x, y+1, z)] = BLOCK_AIR;
+        }
         refreshChunk();
         if (x == 0)refreshNeighborIfExists(WEST);
         else if (x == CHUNK_SIZE - 1)refreshNeighborIfExists(EAST);

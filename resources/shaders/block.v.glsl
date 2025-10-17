@@ -8,10 +8,11 @@ layout (location = 3) in float sideID;
 out vec2 texCoords;
 out float texIndex;
 out vec3 normal;
+out vec3 position;
+
 uniform mat4 uProjection;
 uniform mat4 uModel;
 uniform mat4 uView;
-
 
 const vec3 normals[6] = vec3[6](
     vec3(0,0,1),//north
@@ -26,6 +27,7 @@ void main()
 {
     int side_id = clamp(int(sideID), 0, 5);
 
+    position = aPosition;
     normal = normals[side_id];
     texIndex = aTexIndex;
     texCoords =  aTexCoords;

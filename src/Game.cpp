@@ -3,6 +3,9 @@
 #include <geom/Quad.hpp>
 #include <util/Time.hpp>
 #include <glm/gtc/matrix_transform.hpp>
+void resizeWindow(GLFWwindow* window,int w,int h){
+    glViewport(0,0,w,h);
+}
 void Nanocraft::OnCreate()
 {
     Blocks::initBlocks();
@@ -25,20 +28,22 @@ void Nanocraft::OnCreate()
 
     blockShader.setUniformf("uCellWidth", worldAtlas.getCellWidthRatio());
     blockShader.setUniformf("uCellHeight", worldAtlas.getCellHeightRatio());
+    blockShader.setUniformf("fadeStart", Blocks::Chunk::CHUNK_SIZE*(renderDistance-1));
 
-    world->loadChunks(player->position);
+    world->loadChunks(player->position); 
 }
 void Nanocraft::OnFrame(float deltaTime)
 {
     Time::DELTA_TIME = deltaTime;
 
-    glClearColor(0.1f, 0.2f, 0.3f, 1.0f);
+    glClearColor(0.45f, 0.6f, 0.7f, 1.0f);
     glEnable(GL_DEPTH_TEST);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     blockShader.bindShader();
     blockShader.setUniformMat4f("uView", player->getView());
     glm::mat4 projection = glm::perspective(glm::radians(70.0f), 1280.0f / 720.0f, 0.1f, 10000.0f);
     blockShader.setUniformMat4f("uProjection", projection);
+    blockShader.setUniformVec3("cameraPos", player->position);
    
     world->render();
     world->update(player->position);
@@ -53,12 +58,15 @@ void Nanocraft::OnFrame(float deltaTime)
     }
     player->update(*world);
 }
-Nanocraft::Nanocraft(int width, int height, bool showFPS, bool enableVSync) : 
+Nanocraft::Nanocraft(int width, int height,uint8_t renderDistance, bool showFPS, bool enableVSync) : 
     IO::Window(width, height, "Nanocraft", showFPS, enableVSync),
     worldAtlas(Graphics::TextureAtlas("resources/terrain.png",16,16)),
-    world(std::make_unique<World>(4,4)),
     blockShader(Graphics::Shader("resources/shaders/block.v.glsl", "resources/shaders/block.f.glsl")),
     uiShader(Graphics::Shader("resources/shaders/uishader.v.glsl", "resources/shaders/uishader.f.glsl")),
-    player(std::make_shared<Player>(glm::vec3(0, 20, 0), -90.0f, 0.0f, 70.0f))
+    player(std::make_shared<Player>(glm::vec3(0, 20, 0), -90.0f, 0.0f, 70.0f)),
+    renderDistance(renderDistance)
 {
+    srand(time(NULL));
+    int seed = rand()% 300;
+    world = std::make_unique<World>(std::make_unique<Terrain>(seed,(Terrain::TerrainSettings){20.0f,0.02f,4}),renderDistance,floor((float)renderDistance*0.7f));
 }

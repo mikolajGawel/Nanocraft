@@ -18,7 +18,7 @@ private:
         detailsRenderDistance;
     std::unordered_map<glm::ivec2,std::shared_ptr<Blocks::Chunk>,ivec2_hash> loadedChunks;
     std::unordered_map<glm::ivec2,std::shared_ptr<Blocks::Chunk>,ivec2_hash> savedChunks;
-    Terrain terrain;
+    std::unique_ptr<Terrain> terrain;
     glm::ivec2 lastPlayerPosition;//stores last chunk position of player to avoid loading chunks every frame
     
     //returns chunk and nullptr if chunk not found
@@ -29,7 +29,7 @@ private:
     
         glm::ivec2 getChunkPosition(glm::vec3 position);
     public:
-    World(uint8_t renderDistance,uint8_t detailsRenderDistance);
+    World(std::unique_ptr<Terrain> terrain,uint8_t renderDistance,uint8_t detailsRenderDistance);
     ~World();
     void loadChunks(glm::vec3 positon);//loads chunks at location and remove unnecessary chunks
     void refreshNearby(glm::ivec2 position);//refreshes chunk and all its neighbors

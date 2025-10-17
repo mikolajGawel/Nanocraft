@@ -4,9 +4,10 @@
 #include <stdexcept>
 #include <future>
 
-World::World(uint8_t renderDistance,uint8_t decorationRenderDistance):
-    renderDistance(renderDistance),detailsRenderDistance(decorationRenderDistance),terrain(Terrain(12,{20.0f,0.02f,6}))
-{}
+World::World(std::unique_ptr<Terrain> terrain,uint8_t renderDistance,uint8_t decorationRenderDistance):
+    renderDistance(renderDistance),detailsRenderDistance(decorationRenderDistance),terrain(std::move(terrain))
+{
+}
 World::~World()
 {
     loadedChunks.clear();
@@ -142,7 +143,7 @@ void World::loadChunks(glm::vec3 position)
                 continue;
             }
 
-            futureChunks.push_back(std::async(std::launch::async,Blocks::Chunk::generateChunkFromTerrain,offsetPos,terrain));    
+            futureChunks.push_back(std::async(std::launch::async,Blocks::Chunk::generateChunkFromTerrain,offsetPos,*terrain));    
         }
     }
     std::vector<glm::ivec2> chunkPositions = {};
@@ -194,6 +195,9 @@ void World::render()
     for (auto &iter : loadedChunks)
     {
         std::shared_ptr<Blocks::Chunk>& chunk = iter.second;
+        glEnable(GL_BLEND);
+        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
         glEnable(GL_CULL_FACE);
         glFrontFace(GL_CW);
         glCullFace(GL_BACK);

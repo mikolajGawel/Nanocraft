@@ -10,10 +10,11 @@ class Nanocraft: public IO::Window
     Graphics::TextureAtlas worldAtlas;
     std::shared_ptr<Player> player;
     std::unique_ptr<World> world;
+    uint8_t renderDistance;
 protected:
     virtual void OnCreate() override;
     virtual void OnFrame(float deltaTime) override;
 public:
-    Nanocraft(int width,int height,bool showFPS,bool enableVSync);
+    Nanocraft(int width,int height,uint8_t renderDistance,bool showFPS,bool enableVSync);
 };
 

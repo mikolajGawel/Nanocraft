@@ -8,6 +8,8 @@ namespace Blocks{
         BLOCK_GRASS,
         BLOCK_STONE,
         PLANT_GRASS,
+        PLANT_FLOWER1,
+        PLANT_FLOWER2,
     };
     enum BlockMesh{
         BLOCK_MESH = 0,
