@@ -7,11 +7,17 @@ namespace Blocks{
         BLOCK_DIRT,
         BLOCK_GRASS,
         BLOCK_STONE,
+        PLANT_GRASS,
+    };
+    enum BlockMesh{
+        BLOCK_MESH = 0,
+        PLANT_MESH
     };
     struct Block{
         BlockType id;
         bool transparent;//means that you can see other blocks thru this e.g.: water,glass,air
         Geom::BlockTextureMap textures;
+        BlockMesh blockMeshType = BLOCK_MESH;
     };
     extern std::map<BlockType,Block> BLOCKS;
     bool isBlockTransparent(BlockType blockType);

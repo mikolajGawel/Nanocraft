@@ -1,7 +1,9 @@
 #include "Chunk.hpp"
 #include <geom/BlockMesh.hpp>
+#include <geom/PlantMesh.hpp>
 #include <iostream>
 #include <stdexcept>
+#include <GL/gl3w.h>
 namespace Blocks
 {
     Chunk::ChunkDirection Chunk::getOpositeChunkDirection(ChunkDirection direction)
@@ -17,11 +19,11 @@ namespace Blocks
         case WEST:
             return EAST;
         }
-        throw std::runtime_error("Undefined ChunkDirection: " + direction);
+        throw std::runtime_error("Undefined ChunkDirection: " + std::to_string(direction));
         return NORTH;
     }
-    // if block is air(empty it returns false)
-    bool Chunk::checkBlock(int x, int y, int z)
+    // if block transparent e.g.: AIR GLASS WATER it returns false
+    bool Chunk::checkBlockForFace(int x, int y, int z)
     {
         if (y < 0 || y >= CHUNK_HEIGHT)
             return false;
@@ -64,24 +66,23 @@ namespace Blocks
 
         return false;
     }
-
+    //checks if blocks is covered by any other (when it is then returns face as false so it wont be remembered in chunkMesh)
     Geom::SelectedFaces Chunk::getVisibleFaces(int x, int y, int z)
     {
         return Geom::SelectedFaces{
-            !checkBlock(x, y, z + 1), // north
-            !checkBlock(x, y, z - 1), // south
-            !checkBlock(x + 1, y, z), // east
-            !checkBlock(x - 1, y, z), // west
-            !checkBlock(x, y + 1, z),
-            !checkBlock(x, y - 1, z),
+            !checkBlockForFace(x, y, z + 1), // north
+            !checkBlockForFace(x, y, z - 1), // south
+            !checkBlockForFace(x + 1, y, z), // east
+            !checkBlockForFace(x - 1, y, z), // west
+            !checkBlockForFace(x, y + 1, z), // top
+            !checkBlockForFace(x, y - 1, z), // bottom
         };
     }
     size_t Chunk::getIndex(int x, int y, int z) const
     {
         if (x < 0 || x >= CHUNK_SIZE || y < 0 || y >= CHUNK_HEIGHT || z < 0 || z >= CHUNK_SIZE)
         {
-            std::cerr << "Chunk::getIndex out of bounds: " << x << " " << y << " " << z << std::endl;
-            // throw std::runtime_error("Chunk::getIndex out of bounds");
+            throw std::runtime_error("Chunk::getIndex out of bounds");
 
             return 0;
         }
@@ -115,6 +116,11 @@ namespace Blocks
                         result->blocks[result->getIndex(x, y, z)] = BLOCK_DIRT;
                     else
                         result->blocks[result->getIndex(x, y, z)] = BLOCK_STONE;
+
+                }
+                Terrain::TerrainDecoration deco = terrain.getTerrainDecoration(x + CHUNK_SIZE * chunkPosition.x,z + CHUNK_SIZE * chunkPosition.y);
+                if(deco == Terrain::GRASS){
+                    result->blocks[result->getIndex(x,height,z)] = Blocks::PLANT_GRASS;
                 }
             }
         }
@@ -156,28 +162,41 @@ namespace Blocks
     }
     Geom::BasicMesh Chunk::getBlocksMesh()
     {
+        blocksIndicesCount = 0;
+        //it appends meshes to 2 diffrent lists that are later merged but prioritize blocks so they can be only rendered wihtout details
         std::vector<Geom::BasicMesh> blocksMeshes;
+        std::vector<Geom::BasicMesh> otherMeshes;
         for (int x = 0; x < CHUNK_SIZE; x++)
         {
             for (int z = 0; z < CHUNK_SIZE; z++)
             {
                 for (int y = 0; y < CHUNK_HEIGHT; y++)
                 {
-                    if (blocks[getIndex(x, y, z)] != BLOCK_AIR)
+                    Block block = BLOCKS[blocks[getIndex(x, y, z)]];
+                    if (block.id != BLOCK_AIR)
                     {
-                        Geom::SelectedFaces visibleFaces = getVisibleFaces(x, y, z);
-                        Block block = BLOCKS[blocks[getIndex(x, y, z)]];
                         glm::vec3 worldPos = glm::vec3(
                             x + chunkPosition.x * CHUNK_SIZE,
                             y,
-                            z + chunkPosition.y * CHUNK_SIZE);
-                        worldPos += glm::vec3(0.5f, 0.5f, 0.5f);
+                            z + chunkPosition.y * CHUNK_SIZE
+                        );
+
+                        if(block.blockMeshType == Blocks::BlockMesh::PLANT_MESH){
+                            Geom::BasicMesh plant = Geom::generatePlantMesh(worldPos,block.textures.north);
+                            otherMeshes.push_back(plant);
+                            continue;
+                        }
+                        
+                        Geom::SelectedFaces visibleFaces = getVisibleFaces(x, y, z);
+                        blocksIndicesCount += visibleFaces.count()*6;
                         Geom::BasicMesh newBlock = Geom::generateBlockMesh(worldPos, visibleFaces, block.textures);
                         blocksMeshes.push_back(newBlock);
                     }
                 }
             }
         }
+        
+        blocksMeshes.insert(blocksMeshes.end(),otherMeshes.begin(),otherMeshes.end());
         return mergeMeshes(blocksMeshes);
     }
     void Chunk::setBlock(int x, int y, int z, BlockType type)
@@ -201,16 +220,15 @@ namespace Blocks
         }
         return blocks[getIndex(x, y, z)];
     }
-    int Chunk::chunkIndices()
+    void Chunk::drawChunk()
     {
-
-        return chunkMesh.getIndexCount();
-    }
-    void Chunk::bindChunkMesh()
-    {
-
         chunkMesh.bind();
+        glDrawElements(GL_TRIANGLES,details ? chunkMesh.getIndexCount() : blocksIndicesCount, GL_UNSIGNED_INT, 0);
     }
+    void Chunk::setDetails(bool details){
+        this->details = details;
+    }
+
     void Chunk::setNeighbor(std::weak_ptr<Chunk> neighbor, ChunkDirection direction)
     {
         neighbors[static_cast<int>(direction)] = neighbor;

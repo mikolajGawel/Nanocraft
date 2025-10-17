@@ -4,10 +4,9 @@
 #include <stdexcept>
 #include <future>
 
-World::World(uint8_t renderDistance):
-    renderDistance(renderDistance),terrain(Terrain(12,{20.0f,0.02f,6}))
-{
-}
+World::World(uint8_t renderDistance,uint8_t decorationRenderDistance):
+    renderDistance(renderDistance),detailsRenderDistance(decorationRenderDistance),terrain(Terrain(12,{20.0f,0.02f,6}))
+{}
 World::~World()
 {
     loadedChunks.clear();
@@ -106,12 +105,11 @@ void World::setBlock(glm::ivec3 position, Blocks::BlockType blockType){
     auto chunk = getChunk(chunkPos);
     if(chunk){
         chunk.value()->setBlock(inChunkPos.x,inChunkPos.y,inChunkPos.z,blockType);
-
+        if (savedChunks.find(chunkPos) == savedChunks.end()){
+            savedChunks.insert({chunkPos,chunk.value()});
+        }
     }
-
 }
-
-
 
 static bool isChunkInRange(glm::ivec2 center,int renderDistance,glm::ivec2 chunkPos){
     auto offset = glm::abs(center - chunkPos);
@@ -134,15 +132,23 @@ void World::loadChunks(glm::vec3 position)
         for (int j = -renderDistance; j <= renderDistance; j++)
         {
             glm::ivec2 offsetPos = center + glm::ivec2(i, j);
-            auto currChunk = loadedChunks.find(offsetPos);
+            if (loadedChunks.find(offsetPos) != loadedChunks.end()){continue;}//if found chunk already on this pos then skip
+            
+            //checking is in saved chunks
+            auto currChunk = savedChunks.find(offsetPos);
+            if(currChunk != savedChunks.end())//load chunk back from memory
+            {
+                loadedChunks.insert({currChunk->first,currChunk->second});
+                continue;
+            }
 
-            if (currChunk != loadedChunks.end()){continue;}//if found chunk already on this pos then skip
             futureChunks.push_back(std::async(std::launch::async,Blocks::Chunk::generateChunkFromTerrain,offsetPos,terrain));    
         }
     }
     std::vector<glm::ivec2> chunkPositions = {};
     for(auto& f_chunk: futureChunks){
         auto chunk = f_chunk.get();
+
         addChunk(chunk);
         chunkPositions.push_back(chunk->chunkPosition);
     }
@@ -159,7 +165,12 @@ void World::loadChunks(glm::vec3 position)
             }
         }
     }
-       
+    for(auto& chunk : loadedChunks){   
+        if(chunk.second == nullptr)continue;
+        glm::ivec2 distance = glm::abs(center - chunk.second->chunkPosition);
+        bool inDetailsDistance = (distance.x <= detailsRenderDistance && distance.y <= detailsRenderDistance);
+        chunk.second->setDetails(inDetailsDistance);
+    }
     refresh(chunksRefreshQueue);
     //zrefreshuj nowe chunki
 }
@@ -183,13 +194,10 @@ void World::render()
     for (auto &iter : loadedChunks)
     {
         std::shared_ptr<Blocks::Chunk>& chunk = iter.second;
-        chunk->bindChunkMesh();
         glEnable(GL_CULL_FACE);
         glFrontFace(GL_CW);
         glCullFace(GL_BACK);
-
-        glDrawElements(GL_TRIANGLES, chunk->chunkIndices(), GL_UNSIGNED_INT, 0);
-
+        chunk->drawChunk();
         glDisable(GL_CULL_FACE);
     }
 }

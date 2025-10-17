@@ -17,60 +17,60 @@ namespace Geom
         // North face (z+)
         BlockFace(
             std::array<Vertex, 4>{
-                Vertex{{-0.5f, -0.5f, 0.5f}, {1.0f, 0.0f}},
-                Vertex{{-0.5f, 0.5f, 0.5f}, {1.0f, 1.0f}},
-                Vertex{{0.5f, 0.5f, 0.5f}, {0.0f, 1.0f}},
-                Vertex{{0.5f, -0.5f, 0.5f}, {0.0f, 0.0f}}},
+                Vertex{{0,0,1}, {1.0f, 0.0f}},
+                Vertex{{0,1,1}, {1.0f, 1.0f}},
+                Vertex{{1,1,1}, {0.0f, 1.0f}},
+                Vertex{{1,0,1}, {0.0f, 0.0f}}},
             {0, 1, 2,
              2, 3, 0}),
 
         // South face (z-)
         BlockFace(
             std::array<Vertex, 4>{
-                Vertex{{0.5f, -0.5f, -0.5f}, {1.0f, 0.0f}},
-                Vertex{{0.5f, 0.5f, -0.5f}, {1.0f, 1.0f}},
-                Vertex{{-0.5f, 0.5f, -0.5f}, {0.0f, 1.0f}},
-                Vertex{{-0.5f, -0.5f, -0.5f}, {0.0f, 0.0f}}},
+                Vertex{{1,0,0}, {1.0f, 0.0f}},
+                Vertex{{1,1,0}, {1.0f, 1.0f}},
+                Vertex{{0,1,0}, {0.0f, 1.0f}},
+                Vertex{{0,0,0}, {0.0f, 0.0f}}},
             {0, 1, 2,
              2, 3, 0}),
 
         // East face (x+)
         BlockFace(
             std::array<Vertex, 4>{
-                Vertex{{0.5f, 0.5f, -0.5f}, {1.0f, 1.0f}},
-                Vertex{{0.5f, -0.5f, -0.5f}, {1.0f, 0.0f}},
-                Vertex{{0.5f, -0.5f, 0.5f}, {0.0f, 0.0f}},
-                Vertex{{0.5f, 0.5f, 0.5f}, {0.0f, 1.0f}}},
+                Vertex{{1,1,0}, {1.0f, 1.0f}},
+                Vertex{{1,0,0}, {1.0f, 0.0f}},
+                Vertex{{1,0,1}, {0.0f, 0.0f}},
+                Vertex{{1,1,1}, {0.0f, 1.0f}}},
             {0, 1, 2,
              2, 3, 0}),
 
         // West face (x-)
         BlockFace(
             std::array<Vertex, 4>{
-                Vertex{{-0.5f, 0.5f, 0.5f}, {1.0f, 1.0f}},
-                Vertex{{-0.5f, -0.5f, 0.5f}, {1.0f, 0.0f}},
-                Vertex{{-0.5f, -0.5f, -0.5f}, {0.0f, 0.0f}},
-                Vertex{{-0.5f, 0.5f, -0.5f}, {0.0f, 1.0f}}},
+                Vertex{{0,1,1}, {1.0f, 1.0f}},
+                Vertex{{0,0,1}, {1.0f, 0.0f}},
+                Vertex{{0,0,0}, {0.0f, 0.0f}},
+                Vertex{{0,1,0}, {0.0f, 1.0f}}},
             {0, 1, 2,
              2, 3, 0}),
 
         // Top face (y+)
         BlockFace(
             std::array<Vertex, 4>{
-                Vertex{{0.5f, 0.5f, 0.5f}, {1.0f, 1.0f}},
-                Vertex{{-0.5f, 0.5f, 0.5f}, {1.0f, 0.0f}},
-                Vertex{{-0.5f, 0.5f, -0.5f}, {0.0f, 0.0f}},
-                Vertex{{0.5f, 0.5f, -0.5f}, {0.0f, 1.0f}}},
+                Vertex{{1,1,1}, {1.0f, 1.0f}},
+                Vertex{{0,1,1}, {1.0f, 0.0f}},
+                Vertex{{0,1,0}, {0.0f, 0.0f}},
+                Vertex{{1,1,0}, {0.0f, 1.0f}}},
             {0, 1, 2,
              2, 3, 0}),
 
         // Bottom face (y-)
         BlockFace(
             std::array<Vertex, 4>{
-                Vertex{{0.5f, -0.5f, -0.5f}, {1.0f, 1.0f}},
-                Vertex{{-0.5f, -0.5f, -0.5f}, {1.0f, 0.0f}},
-                Vertex{{-0.5f, -0.5f, 0.5f}, {0.0f, 0.0f}},
-                Vertex{{0.5f, -0.5f, 0.5f}, {0.0f, 1.0f}}},
+                Vertex{{1,0,0}, {1.0f, 1.0f}},
+                Vertex{{0,0,0}, {1.0f, 0.0f}},
+                Vertex{{0,0,1}, {0.0f, 0.0f}},
+                Vertex{{1,0,1}, {0.0f, 1.0f}}},
             {0, 1, 2,
              2, 3, 0})};
 

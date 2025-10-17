@@ -22,7 +22,7 @@ namespace Blocks
         static ChunkDirection getOpositeChunkDirection(ChunkDirection direction);
     private: 
         std::array<std::weak_ptr<Chunk>,4> neighbors;
-        bool checkBlock(int x,int y,int z);
+        bool checkBlockForFace(int x,int y,int z);
         Geom::SelectedFaces getVisibleFaces(int x,int y,int z);
         Geom::BasicMesh getBlocksMesh();
         
@@ -30,6 +30,9 @@ namespace Blocks
         std::array<BlockType, CHUNK_SIZE * CHUNK_HEIGHT * CHUNK_SIZE> blocks;
         size_t getIndex(int x, int y, int z) const;
         void refreshNeighborIfExists(ChunkDirection direction);
+        
+        int blocksIndicesCount;//saved to remember size for indices of blocks to draw the without details;
+        bool details = true;
     public:
         glm::ivec2 chunkPosition; // chunk position in chunk coordinates
         Chunk(glm::ivec2 chunkPosition);
@@ -40,8 +43,8 @@ namespace Blocks
         void setBlock(int x, int y, int z, BlockType type);
         void refreshChunk();
         void refreshChunkAndNeighbors();
-        int chunkIndices();
-        void bindChunkMesh();
+        void drawChunk();
+        void setDetails(bool details);
         void setNeighbor(std::weak_ptr<Chunk> neighbor,ChunkDirection direction);
     };
 } // namespace Blocks

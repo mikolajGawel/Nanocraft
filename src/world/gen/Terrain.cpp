@@ -18,3 +18,8 @@ int Terrain::getTerrainHeight(int x,int y){
 
     return static_cast<int>(round(result) + 1);
 }
+Terrain::TerrainDecoration Terrain::getTerrainDecoration(int x,int y){
+    float result = Noise::perlin(seed,x, y);
+    int i = floor(abs(result*3));
+    return (i == 2 ) ? GRASS : NONE;
+}

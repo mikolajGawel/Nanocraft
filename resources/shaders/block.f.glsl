@@ -22,7 +22,8 @@ void main()
     offset.y = 1.0 - cellSize.y -  offset.y;
 
     vec2 coords =  offset + texCoords * cellSize;
-
+    vec4 texture_color = texture(uTex,coords);
+    if(texture_color.a < 0.1) discard;
     //added small level of static lights for better blocks visibility
     vec3 lightPos = vec3(1,1,1);
     float ambient = 0.5;
@@ -30,5 +31,5 @@ void main()
     float diff= max(dot(normal,lightDir),0.0);
 
     vec4 color = vec4(min(ambient+diff,1.0));
-    FragColor = texture(uTex,coords) * color;
+    FragColor = texture_color * color;
 }

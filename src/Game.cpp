@@ -8,25 +8,25 @@ void Nanocraft::OnCreate()
     Blocks::initBlocks();
     Geom::Quad::init();
 
-    glm::mat4 view = camera->getView();
+    glm::mat4 view = player->getView();
     glm::mat4 model = glm::mat4(1.0f);
 
     uiShader.compileShader();
-    shader.compileShader();
-    shader.bindShader();
+    blockShader.compileShader();
+    blockShader.bindShader();
 
-    shader.setUniformMat4f("uView", view);
-    shader.setUniformMat4f("uModel", model);
+    blockShader.setUniformMat4f("uView", view);
+    blockShader.setUniformMat4f("uModel", model);
 
     worldAtlas.loadTexture();
 
     glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_2D, worldAtlas.getTexureID());
 
-    shader.setUniformf("uCellWidth", worldAtlas.getCellWidthRatio());
-    shader.setUniformf("uCellHeight", worldAtlas.getCellHeightRatio());
+    blockShader.setUniformf("uCellWidth", worldAtlas.getCellWidthRatio());
+    blockShader.setUniformf("uCellHeight", worldAtlas.getCellHeightRatio());
 
-    world->loadChunks(camera->position);
+    world->loadChunks(player->position);
 }
 void Nanocraft::OnFrame(float deltaTime)
 {
@@ -35,13 +35,13 @@ void Nanocraft::OnFrame(float deltaTime)
     glClearColor(0.1f, 0.2f, 0.3f, 1.0f);
     glEnable(GL_DEPTH_TEST);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-    shader.bindShader();
-    shader.setUniformMat4f("uView", camera->getView());
+    blockShader.bindShader();
+    blockShader.setUniformMat4f("uView", player->getView());
     glm::mat4 projection = glm::perspective(glm::radians(70.0f), 1280.0f / 720.0f, 0.1f, 10000.0f);
-    shader.setUniformMat4f("uProjection", projection);
+    blockShader.setUniformMat4f("uProjection", projection);
    
     world->render();
-    world->update(camera->position);
+    world->update(player->position);
     
     if (IO::Input::isButtonDown(GLFW_MOUSE_BUTTON_LEFT))
     {
@@ -51,8 +51,14 @@ void Nanocraft::OnFrame(float deltaTime)
     {
         glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
     }
-    camera->update(*world);
+    player->update(*world);
 }
-Nanocraft::Nanocraft(int width, int height, bool showFPS, bool enableVSync) : IO::Window(width, height, "Nanocraft", showFPS, enableVSync)
+Nanocraft::Nanocraft(int width, int height, bool showFPS, bool enableVSync) : 
+    IO::Window(width, height, "Nanocraft", showFPS, enableVSync),
+    worldAtlas(Graphics::TextureAtlas("resources/terrain.png",16,16)),
+    world(std::make_unique<World>(4,4)),
+    blockShader(Graphics::Shader("resources/shaders/block.v.glsl", "resources/shaders/block.f.glsl")),
+    uiShader(Graphics::Shader("resources/shaders/uishader.v.glsl", "resources/shaders/uishader.f.glsl")),
+    player(std::make_shared<Player>(glm::vec3(0, 20, 0), -90.0f, 0.0f, 70.0f))
 {
 }
