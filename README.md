@@ -1,5 +1,5 @@
 # Nanocraft
-My own take on creating voxel engine.\ 
+My own take on creating voxel engine.\
 Made using C++ and OpenGL framework.
 ![screenshot](screenshots/screenshot1.png)
 
