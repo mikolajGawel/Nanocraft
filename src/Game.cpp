@@ -67,6 +67,7 @@ Nanocraft::Nanocraft(int width, int height,uint8_t renderDistance, bool showFPS,
     renderDistance(renderDistance)
 {
     srand(time(NULL));
-    int seed = rand()% 300;
+    int seed = rand()% 300 + rand()%1000;
+    
     world = std::make_unique<World>(std::make_unique<Terrain>(seed,(Terrain::TerrainSettings){20.0f,0.02f,4}),renderDistance,floor((float)renderDistance*0.7f));
 }
