@@ -23,8 +23,6 @@ void IO::Window::init()
 #ifdef __APPLE__
     glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE); // For macOS
 #endif
-
-    // Create window
     window = glfwCreateWindow(width, height, title.c_str(), nullptr, nullptr);
     if (!window)
     {
@@ -35,6 +33,13 @@ void IO::Window::init()
     glfwSetCursorPosCallback(window, IO::Input::mousePositionCallback);
     glfwSetKeyCallback(window, IO::Input::keyCallback);
     glfwSetMouseButtonCallback(window, IO::Input::mouseButtonsCallback);
+
+    glfwSetWindowUserPointer(window,this);
+    glfwSetFramebufferSizeCallback(window,[](GLFWwindow* window,int w,int h){
+        auto window_ptr = static_cast<Window*>(glfwGetWindowUserPointer(window));
+        if(window_ptr != nullptr)
+            window_ptr->OnResize((Viewport){w,h});
+    });
 
     glfwMakeContextCurrent(window);
     glfwSwapInterval(enableVsync ? 1 : 0);

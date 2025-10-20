@@ -3,9 +3,7 @@
 #include <geom/Quad.hpp>
 #include <util/Time.hpp>
 #include <glm/gtc/matrix_transform.hpp>
-void resizeWindow(GLFWwindow* window,int w,int h){
-    glViewport(0,0,w,h);
-}
+
 void Nanocraft::OnCreate()
 {
     Blocks::initBlocks();
@@ -41,7 +39,7 @@ void Nanocraft::OnFrame(float deltaTime)
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     blockShader.bindShader();
     blockShader.setUniformMat4f("uView", player->getView());
-    glm::mat4 projection = glm::perspective(glm::radians(70.0f), 1280.0f / 720.0f, 0.1f, 10000.0f);
+    glm::mat4 projection = glm::perspective(glm::radians(70.0f), gameViewport.getAspectRatio(), 0.1f, 10000.0f);
     blockShader.setUniformMat4f("uProjection", projection);
     blockShader.setUniformVec3("cameraPos", player->position);
    
@@ -58,13 +56,18 @@ void Nanocraft::OnFrame(float deltaTime)
     }
     player->update(*world);
 }
+void Nanocraft::OnResize(Viewport viewport){
+    glViewport(0,0,viewport.width,viewport.height);
+    gameViewport = viewport;
+}
 Nanocraft::Nanocraft(int width, int height,uint8_t renderDistance, bool showFPS, bool enableVSync) : 
     IO::Window(width, height, "Nanocraft", showFPS, enableVSync),
     worldAtlas(Graphics::TextureAtlas("resources/terrain.png",16,16)),
     blockShader(Graphics::Shader("resources/shaders/block.v.glsl", "resources/shaders/block.f.glsl")),
     uiShader(Graphics::Shader("resources/shaders/uishader.v.glsl", "resources/shaders/uishader.f.glsl")),
     player(std::make_shared<Player>(glm::vec3(0, 20, 0), -90.0f, 0.0f, 70.0f)),
-    renderDistance(renderDistance)
+    renderDistance(renderDistance),
+    gameViewport((Viewport){width,height})
 {
     srand(time(NULL));
     int seed = rand()% 300 + rand()%1000;

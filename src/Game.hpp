@@ -11,9 +11,12 @@ class Nanocraft: public IO::Window
     std::shared_ptr<Player> player;
     std::unique_ptr<World> world;
     uint8_t renderDistance;
+    Viewport gameViewport;
+
 protected:
-    virtual void OnCreate() override;
-    virtual void OnFrame(float deltaTime) override;
+    void OnResize(Viewport viewport) override;
+    void OnCreate() override;
+    void OnFrame(float deltaTime) override;
 public:
     Nanocraft(int width,int height,uint8_t renderDistance,bool showFPS,bool enableVSync);
 };
