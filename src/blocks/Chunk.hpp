@@ -22,7 +22,7 @@ namespace Blocks
         static ChunkDirection getOpositeChunkDirection(ChunkDirection direction);
     private: 
         std::array<std::weak_ptr<Chunk>,4> neighbors;
-        bool checkBlockForFace(int x,int y,int z);
+        Blocks::BlockType checkBlockAndNeighbors(int x,int y,int z);
         Geom::SelectedFaces getVisibleFaces(int x,int y,int z);
         Geom::BasicMesh getBlocksMesh();
         

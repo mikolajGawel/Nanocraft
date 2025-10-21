@@ -12,6 +12,30 @@ void Nanocraft::OnCreate()
     glm::mat4 view = player->getView();
     glm::mat4 model = glm::mat4(1.0f);
 
+    framebufferShader.compileShader();
+    glGenFramebuffers(1,&framebuffer);
+    glBindFramebuffer(GL_FRAMEBUFFER,framebuffer);
+
+    glGenTextures(1,&framebuffer_tex);
+    glBindTexture(GL_TEXTURE_2D,framebuffer_tex);
+    glTexImage2D(GL_TEXTURE_2D,0,GL_RGB,gameViewport.width,gameViewport.height,0,GL_RGB,GL_UNSIGNED_BYTE,NULL);
+    glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,GL_LINEAR);
+
+    glFramebufferTexture2D(GL_FRAMEBUFFER,GL_COLOR_ATTACHMENT0,GL_TEXTURE_2D,framebuffer_tex,0);
+
+    glGenRenderbuffers(1,&rbo);
+    glBindRenderbuffer(GL_RENDERBUFFER,rbo);
+    glRenderbufferStorage(GL_RENDERBUFFER,GL_DEPTH24_STENCIL8,gameViewport.width,gameViewport.height);
+    glFramebufferRenderbuffer(GL_FRAMEBUFFER,GL_DEPTH_STENCIL_ATTACHMENT,GL_RENDERBUFFER,rbo);
+    
+    if(glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE){
+        std::cout << "Error framebuffer\n";
+    }
+
+    glBindTexture(GL_TEXTURE_2D,0);
+    glBindFramebuffer(GL_FRAMEBUFFER,0);
+
     uiShader.compileShader();
     blockShader.compileShader();
     blockShader.bindShader();
@@ -32,11 +56,13 @@ void Nanocraft::OnCreate()
 }
 void Nanocraft::OnFrame(float deltaTime)
 {
-    Time::DELTA_TIME = deltaTime;
 
+    Time::DELTA_TIME = deltaTime;
+    glBindFramebuffer(GL_FRAMEBUFFER,framebuffer);
     glClearColor(0.45f, 0.6f, 0.7f, 1.0f);
     glEnable(GL_DEPTH_TEST);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    glBindTexture(GL_TEXTURE_2D,worldAtlas.getTexureID()); 
     blockShader.bindShader();
     blockShader.setUniformMat4f("uView", player->getView());
     glm::mat4 projection = glm::perspective(glm::radians(70.0f), gameViewport.getAspectRatio(), 0.1f, 10000.0f);
@@ -44,6 +70,14 @@ void Nanocraft::OnFrame(float deltaTime)
     blockShader.setUniformVec3("cameraPos", player->position);
    
     world->render();
+    glBindFramebuffer(GL_FRAMEBUFFER,0);
+    glClear(GL_DEPTH_BUFFER_BIT);
+    glClearColor(0.45f, 0.6f, 0.7f, 1.0f);
+    glBindTexture(GL_TEXTURE_2D,framebuffer_tex);
+    
+    framebufferShader.bindShader();
+    Geom::Quad::draw();
+
     world->update(player->position);
     
     if (IO::Input::isButtonDown(GLFW_MOUSE_BUTTON_LEFT))
@@ -65,6 +99,7 @@ Nanocraft::Nanocraft(int width, int height,uint8_t renderDistance, bool showFPS,
     worldAtlas(Graphics::TextureAtlas("resources/terrain.png",16,16)),
     blockShader(Graphics::Shader("resources/shaders/block.v.glsl", "resources/shaders/block.f.glsl")),
     uiShader(Graphics::Shader("resources/shaders/uishader.v.glsl", "resources/shaders/uishader.f.glsl")),
+    framebufferShader(Graphics::Shader("resources/shaders/framebuffer.v.glsl", "resources/shaders/framebuffer.f.glsl")),
     player(std::make_shared<Player>(glm::vec3(0, 20, 0), -90.0f, 0.0f, 70.0f)),
     renderDistance(renderDistance),
     gameViewport((Viewport){width,height})

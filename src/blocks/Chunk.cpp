@@ -22,60 +22,62 @@ namespace Blocks
         throw std::runtime_error("Undefined ChunkDirection: " + std::to_string(direction));
         return NORTH;
     }
-    // if block transparent e.g.: AIR GLASS WATER it returns false
-    bool Chunk::checkBlockForFace(int x, int y, int z)
+    // checks blocks on chunks and one that are connected on neighbors
+    Blocks::BlockType Chunk::checkBlockAndNeighbors(int x, int y, int z)
     {
         if (y < 0 || y >= CHUNK_HEIGHT)
-            return false;
+            return BLOCK_AIR;
 
         if (x >= 0 && x < CHUNK_SIZE && z >= 0 && z < CHUNK_SIZE) // check on chunk itself
-            return (!isBlockTransparent(blocks[getIndex(x, y, z)]));
+            return (blocks[getIndex(x, y, z)]);
 
         if (z == CHUNK_SIZE && x >= 0 && x < CHUNK_SIZE) // check north neighbor
         {
             if (auto north = neighbors[NORTH].lock())
             {
-                return (!isBlockTransparent(north->blocks[getIndex(x, y, 0)]));
+                return (north->blocks[getIndex(x, y, 0)]);
             }
-            return false;
+            return BLOCK_AIR;
         }
         if (z == -1 && x >= 0 && x < CHUNK_SIZE) // check south neighbord
         {
             if (auto south = neighbors[SOUTH].lock())
             {
-                return (!isBlockTransparent(south->blocks[getIndex(x, y, CHUNK_SIZE - 1)]));
+                return (south->blocks[getIndex(x, y, CHUNK_SIZE - 1)]);
             }
-            return false;
+            return BLOCK_AIR;
         }
         if (x == CHUNK_SIZE && z >= 0 && z < CHUNK_SIZE) // check east neighbord
         {
             if (auto east = neighbors[EAST].lock())
             {
-                return (!isBlockTransparent(east->blocks[getIndex(0, y, z)]));
+                return (east->blocks[getIndex(0, y, z)]);
             }
-            return false;
+            return BLOCK_AIR;
         }
         if (x == -1 && z >= 0 && z < CHUNK_SIZE) // check west neighbord
         {
             if (auto west = neighbors[WEST].lock())
             {
-                return (!isBlockTransparent(west->blocks[getIndex(CHUNK_SIZE - 1, y, z)]));
+                return (west->blocks[getIndex(CHUNK_SIZE - 1, y, z)]);
             }
-            return false;
+            return BLOCK_AIR;
         }
 
-        return false;
+        return BLOCK_AIR;
     }
-    //checks if blocks is covered by any other (when it is then returns face as false so it wont be remembered in chunkMesh)
+
+    // checks if blocks is covered by any other (when it is then returns face as false so it wont be remembered in chunkMesh)
     Geom::SelectedFaces Chunk::getVisibleFaces(int x, int y, int z)
     {
         return Geom::SelectedFaces{
-            !checkBlockForFace(x, y, z + 1), // north
-            !checkBlockForFace(x, y, z - 1), // south
-            !checkBlockForFace(x + 1, y, z), // east
-            !checkBlockForFace(x - 1, y, z), // west
-            !checkBlockForFace(x, y + 1, z), // top
-            !checkBlockForFace(x, y - 1, z), // bottom
+            // if neighbor is transparent then it returns true so face is visible
+            Blocks::isBlockTransparent(checkBlockAndNeighbors(x, y, z + 1)), // north
+            Blocks::isBlockTransparent(checkBlockAndNeighbors(x, y, z - 1)), // south
+            Blocks::isBlockTransparent(checkBlockAndNeighbors(x + 1, y, z)), // east
+            Blocks::isBlockTransparent(checkBlockAndNeighbors(x - 1, y, z)), // west
+            Blocks::isBlockTransparent(checkBlockAndNeighbors(x, y + 1, z)), // top
+            Blocks::isBlockTransparent(checkBlockAndNeighbors(x, y - 1, z)), // bottom
         };
     }
     size_t Chunk::getIndex(int x, int y, int z) const
@@ -100,14 +102,15 @@ namespace Blocks
     {
         blocks.fill(BLOCK_AIR);
     }
-    std::shared_ptr<Chunk> Chunk::generateChunkFromTerrain(glm::ivec2 chunkPosition,Terrain terrain){
+    std::shared_ptr<Chunk> Chunk::generateChunkFromTerrain(glm::ivec2 chunkPosition, Terrain terrain)
+    {
         auto result = std::make_shared<Chunk>(chunkPosition);
         for (int x = 0; x < CHUNK_SIZE; x++)
         {
             for (int z = 0; z < CHUNK_SIZE; z++)
             {
-                
-                int height = terrain.getTerrainHeight(x + CHUNK_SIZE * chunkPosition.x,z + CHUNK_SIZE * chunkPosition.y);
+
+                int height = terrain.getTerrainHeight(x + CHUNK_SIZE * chunkPosition.x, z + CHUNK_SIZE * chunkPosition.y);
                 for (int y = 0; y < height; y++)
                 {
                     if (y == height - 1)
@@ -116,11 +119,23 @@ namespace Blocks
                         result->blocks[result->getIndex(x, y, z)] = BLOCK_DIRT;
                     else
                         result->blocks[result->getIndex(x, y, z)] = BLOCK_STONE;
-
                 }
-                Terrain::TerrainDecoration deco = terrain.getTerrainDecoration(x + CHUNK_SIZE * chunkPosition.x,z + CHUNK_SIZE * chunkPosition.y);
-                if(deco != Terrain::NONE && result->blocks[result->getIndex(x,height-1,z)] == BLOCK_GRASS){
-                    result->blocks[result->getIndex(x,height,z)] = static_cast<BlockType>(deco);
+                if (height < 5)
+                {
+                    for (int y = 4; y > 0; y--)
+                    {
+                        if (!isBlockTransparent(result->blocks[result->getIndex(x, y, z)]))
+                            break;
+                        result->blocks[result->getIndex(x, y, z)] = FLUID_WATER;
+                    }
+                }
+                else
+                {
+                    Terrain::TerrainDecoration deco = terrain.getTerrainDecoration(x + CHUNK_SIZE * chunkPosition.x, z + CHUNK_SIZE * chunkPosition.y);
+                    if (deco != Terrain::NONE && result->blocks[result->getIndex(x, height - 1, z)] == BLOCK_GRASS)
+                    {
+                        result->blocks[result->getIndex(x, height, z)] = static_cast<BlockType>(deco);
+                    }
                 }
             }
         }
@@ -163,7 +178,7 @@ namespace Blocks
     Geom::BasicMesh Chunk::getBlocksMesh()
     {
         blocksIndicesCount = 0;
-        //it appends meshes to 2 diffrent lists that are later merged but prioritize blocks so they can be only rendered wihtout details
+        // it appends meshes to 2 diffrent lists that are later merged but prioritize blocks so they can be only rendered wihtout details
         std::vector<Geom::BasicMesh> blocksMeshes;
         std::vector<Geom::BasicMesh> otherMeshes;
         for (int x = 0; x < CHUNK_SIZE; x++)
@@ -178,40 +193,60 @@ namespace Blocks
                         glm::vec3 worldPos = glm::vec3(
                             x + chunkPosition.x * CHUNK_SIZE,
                             y,
-                            z + chunkPosition.y * CHUNK_SIZE
-                        );
+                            z + chunkPosition.y * CHUNK_SIZE);
 
-                        if(block.blockMeshType == Blocks::BlockMesh::PLANT_MESH){
-                            Geom::BasicMesh plant = Geom::generatePlantMesh(worldPos,block.textures.north);
+                        if (block.blockMeshType == Blocks::BlockMesh::PLANT_MESH)
+                        {
+                            Geom::BasicMesh plant = Geom::generatePlantMesh(worldPos, block.textures.north);
                             otherMeshes.push_back(plant);
                             continue;
                         }
-                        
+                        if (block.blockMeshType == Blocks::BlockMesh::LIQUID_MESH)
+                        {
+                            Geom::SelectedFaces visibleFaces = Geom::SelectedFaces{
+                                //makes faces visible only for air and liqiuds with other id
+                                ( BLOCK_AIR == checkBlockAndNeighbors(x, y, z + 1) || (BLOCKS[checkBlockAndNeighbors(x, y, z + 1)].blockMeshType == BlockMesh::LIQUID_MESH && BLOCKS[checkBlockAndNeighbors(x, y, z + 1)].id != block.id)), // north
+                                ( BLOCK_AIR == checkBlockAndNeighbors(x, y, z - 1) || (BLOCKS[checkBlockAndNeighbors(x, y, z - 1)].blockMeshType == BlockMesh::LIQUID_MESH && BLOCKS[checkBlockAndNeighbors(x, y, z - 1)].id != block.id)), // south
+                                ( BLOCK_AIR == checkBlockAndNeighbors(x + 1, y, z) || (BLOCKS[checkBlockAndNeighbors(x + 1, y, z)].blockMeshType == BlockMesh::LIQUID_MESH && BLOCKS[checkBlockAndNeighbors(x + 1, y, z)].id != block.id)), // east
+                                ( BLOCK_AIR == checkBlockAndNeighbors(x - 1, y, z) || (BLOCKS[checkBlockAndNeighbors(x - 1, y, z)].blockMeshType == BlockMesh::LIQUID_MESH && BLOCKS[checkBlockAndNeighbors(x - 1, y, z)].id != block.id)), // west
+                                ( BLOCK_AIR == checkBlockAndNeighbors(x, y + 1, z) || (BLOCKS[checkBlockAndNeighbors(x, y + 1, z)].blockMeshType == BlockMesh::LIQUID_MESH && BLOCKS[checkBlockAndNeighbors(x, y + 1, z)].id != block.id)), // top
+                                ( BLOCK_AIR == checkBlockAndNeighbors(x, y - 1, z) || (BLOCKS[checkBlockAndNeighbors(x, y - 1, z)].blockMeshType == BlockMesh::LIQUID_MESH && BLOCKS[checkBlockAndNeighbors(x, y - 1, z)].id != block.id)), // bottom
+                            };
+                            blocksIndicesCount += visibleFaces.count() * 6;
+                            Geom::BasicMesh newBlock = Geom::generateBlockMesh(worldPos, visibleFaces, block.textures);
+                            blocksMeshes.push_back(newBlock);
+                            continue;
+                        }
+
                         Geom::SelectedFaces visibleFaces = getVisibleFaces(x, y, z);
-                        blocksIndicesCount += visibleFaces.count()*6;
+                        blocksIndicesCount += visibleFaces.count() * 6;
                         Geom::BasicMesh newBlock = Geom::generateBlockMesh(worldPos, visibleFaces, block.textures);
                         blocksMeshes.push_back(newBlock);
                     }
                 }
             }
         }
-        
-        blocksMeshes.insert(blocksMeshes.end(),otherMeshes.begin(),otherMeshes.end());
+
+        blocksMeshes.insert(blocksMeshes.end(), otherMeshes.begin(), otherMeshes.end());
         return mergeMeshes(blocksMeshes);
     }
     void Chunk::setBlock(int x, int y, int z, BlockType type)
     {
         blocks[getIndex(x, y, z)] = type;
-        if(BLOCKS[blocks[getIndex(x, y+1, z)]].blockMeshType == BlockMesh::PLANT_MESH){
-            blocks[getIndex(x, y+1, z)] = BLOCK_AIR;
+        if (BLOCKS[blocks[getIndex(x, y + 1, z)]].blockMeshType == BlockMesh::PLANT_MESH)
+        {
+            blocks[getIndex(x, y + 1, z)] = BLOCK_AIR;
         }
         refreshChunk();
-        if (x == 0)refreshNeighborIfExists(WEST);
-        else if (x == CHUNK_SIZE - 1)refreshNeighborIfExists(EAST);
+        if (x == 0)
+            refreshNeighborIfExists(WEST);
+        else if (x == CHUNK_SIZE - 1)
+            refreshNeighborIfExists(EAST);
 
-        if (z == 0)refreshNeighborIfExists(SOUTH);
-        else if (z == CHUNK_SIZE - 1)refreshNeighborIfExists(NORTH);
-
+        if (z == 0)
+            refreshNeighborIfExists(SOUTH);
+        else if (z == CHUNK_SIZE - 1)
+            refreshNeighborIfExists(NORTH);
     }
 
     BlockType Chunk::getBlock(int x, int y, int z) const
@@ -226,9 +261,10 @@ namespace Blocks
     void Chunk::drawChunk()
     {
         chunkMesh.bind();
-        glDrawElements(GL_TRIANGLES,details ? chunkMesh.getIndexCount() : blocksIndicesCount, GL_UNSIGNED_INT, 0);
+        glDrawElements(GL_TRIANGLES, details ? chunkMesh.getIndexCount() : blocksIndicesCount, GL_UNSIGNED_INT, 0);
     }
-    void Chunk::setDetails(bool details){
+    void Chunk::setDetails(bool details)
+    {
         this->details = details;
     }
 

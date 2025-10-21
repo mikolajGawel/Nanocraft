@@ -12,7 +12,8 @@ namespace Blocks{
         BLOCKS[PLANT_GRASS] = {PLANT_GRASS,true,Geom::BlockTextureMap::all(16),BlockMesh::PLANT_MESH};
         BLOCKS[PLANT_FLOWER1] = {PLANT_FLOWER1,true,Geom::BlockTextureMap::all(17),BlockMesh::PLANT_MESH};
         BLOCKS[PLANT_FLOWER2] = {PLANT_FLOWER2,true,Geom::BlockTextureMap::all(18),BlockMesh::PLANT_MESH};
-
+        
+        BLOCKS[FLUID_WATER] = {FLUID_WATER,true,Geom::BlockTextureMap::all(32),BlockMesh::LIQUID_MESH};
     }
     bool isBlockTransparent(BlockType blockType){
         return BLOCKS[blockType].transparent;

@@ -7,13 +7,17 @@ namespace Blocks{
         BLOCK_DIRT,
         BLOCK_GRASS,
         BLOCK_STONE,
+        
         PLANT_GRASS,
         PLANT_FLOWER1,
         PLANT_FLOWER2,
+
+        FLUID_WATER
     };
     enum BlockMesh{
         BLOCK_MESH = 0,
-        PLANT_MESH
+        PLANT_MESH,
+        LIQUID_MESH
     };
     struct Block{
         BlockType id;
