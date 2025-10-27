@@ -12,7 +12,7 @@ namespace Noise
     }
     float noise(float x, float y, float z)
     {
-        float n = x * 3.14 + y * 2137 + z * 79817;
+        float n = fmod(x * 3.14 + y * 21.37 + z * 79123.817,10000.0f);
         float nn = (sin(n) * 6664321);
         return nn - floor(nn);
     }

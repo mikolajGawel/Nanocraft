@@ -93,6 +93,12 @@ void Nanocraft::OnFrame(float deltaTime)
 void Nanocraft::OnResize(Viewport viewport){
     glViewport(0,0,viewport.width,viewport.height);
     gameViewport = viewport;
+
+    glBindTexture(GL_TEXTURE_2D,framebuffer_tex);
+    glTexImage2D(GL_TEXTURE_2D,0,GL_RGB,gameViewport.width,gameViewport.height,0,GL_RGB,GL_UNSIGNED_BYTE,NULL);
+
+    glBindRenderbuffer(GL_RENDERBUFFER,rbo);
+    glRenderbufferStorage(GL_RENDERBUFFER,GL_DEPTH24_STENCIL8,gameViewport.width,gameViewport.height);
 }
 Nanocraft::Nanocraft(int width, int height,uint8_t renderDistance, bool showFPS, bool enableVSync) : 
     IO::Window(width, height, "Nanocraft", showFPS, enableVSync),
@@ -105,7 +111,7 @@ Nanocraft::Nanocraft(int width, int height,uint8_t renderDistance, bool showFPS,
     gameViewport((Viewport){width,height})
 {
     srand(time(NULL));
-    int seed = rand()% 300 + rand()%1000;
+    int seed = rand();
     
     world = std::make_unique<World>(std::make_unique<Terrain>(seed,(Terrain::TerrainSettings){20.0f,0.02f,4}),renderDistance,floor((float)renderDistance*0.7f));
 }
