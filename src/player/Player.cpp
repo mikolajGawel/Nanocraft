@@ -104,7 +104,7 @@ void Player::action(World &world)
             glm::ivec3 castedBlockPos = ray->blockPos;
             glm::ivec3 positionToPlaceBlock = castedBlockPos - Raycast::sideToCoordinates(ray->blockSide);
             if(world.getBlock(positionToPlaceBlock) == Blocks::BLOCK_AIR)
-                world.setBlock(positionToPlaceBlock,Blocks::BLOCK_STONE);
+                world.setBlock(positionToPlaceBlock,Blocks::BLOCK_GLASS);
         } 
     }
     place_pressed = Input::isButtonDown(GLFW_MOUSE_BUTTON_2);

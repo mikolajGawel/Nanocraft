@@ -1,6 +1,7 @@
 #include "Chunk.hpp"
-#include <geom/BlockMesh.hpp>
-#include <geom/PlantMesh.hpp>
+#include <geom/meshes/BlockMesh.hpp>
+#include <geom/meshes/PlantMesh.hpp>
+#include <geom/meshes/LiquidMesh.hpp>
 #include <iostream>
 #include <stdexcept>
 #include <GL/gl3w.h>
@@ -126,7 +127,7 @@ namespace Blocks
                     {
                         if (!isBlockTransparent(result->blocks[result->getIndex(x, y, z)]))
                             break;
-                        result->blocks[result->getIndex(x, y, z)] = FLUID_WATER;
+                        result->blocks[result->getIndex(x, y, z)] = LIQUID_WATER;
                     }
                 }
                 else
@@ -164,8 +165,9 @@ namespace Blocks
     }
     void Chunk::refreshChunk()
     {
-        auto mesh = getBlocksMesh();
-        chunkMesh.setMesh(mesh);
+        auto [mesh,mesh2] = getBlocksMesh();
+        mainBlocksMesh.setMesh(mesh);
+        transparentBlocksMesh.setMesh(mesh2);
     }
     void Chunk::refreshChunkAndNeighbors()
     {
@@ -175,11 +177,12 @@ namespace Blocks
         }
         refreshChunk();
     }
-    Geom::BasicMesh Chunk::getBlocksMesh()
+    std::tuple<Geom::BasicMesh,Geom::BasicMesh> Chunk::getBlocksMesh()
     {
         blocksIndicesCount = 0;
         // it appends meshes to 2 diffrent lists that are later merged but prioritize blocks so they can be only rendered wihtout details
         std::vector<Geom::BasicMesh> blocksMeshes;
+        std::vector<Geom::BasicMesh> transparentMeshes;
         std::vector<Geom::BasicMesh> otherMeshes;
         for (int x = 0; x < CHUNK_SIZE; x++)
         {
@@ -212,13 +215,33 @@ namespace Blocks
                                 ( BLOCK_AIR == checkBlockAndNeighbors(x, y + 1, z) || (BLOCKS[checkBlockAndNeighbors(x, y + 1, z)].blockMeshType == BlockMesh::LIQUID_MESH && BLOCKS[checkBlockAndNeighbors(x, y + 1, z)].id != block.id)), // top
                                 ( BLOCK_AIR == checkBlockAndNeighbors(x, y - 1, z) || (BLOCKS[checkBlockAndNeighbors(x, y - 1, z)].blockMeshType == BlockMesh::LIQUID_MESH && BLOCKS[checkBlockAndNeighbors(x, y - 1, z)].id != block.id)), // bottom
                             };
-                            blocksIndicesCount += visibleFaces.count() * 6;
-                            Geom::BasicMesh newBlock = Geom::generateBlockMesh(worldPos, visibleFaces, block.textures);
-                            blocksMeshes.push_back(newBlock);
+                            Geom::BasicMesh newBlock = Geom::generateLiquidMesh(worldPos, visibleFaces, block.textures);
+                            if(block.transparent){
+                                transparentMeshes.push_back(newBlock);
+                            }else{
+                                blocksMeshes.push_back(newBlock);
+                                blocksIndicesCount += visibleFaces.count() * 6;
+                            }
                             continue;
                         }
 
                         Geom::SelectedFaces visibleFaces = getVisibleFaces(x, y, z);
+                        if(block.transparent){
+                             visibleFaces = Geom::SelectedFaces{
+                                //makes faces visible only for air and liqiuds with other id
+                                (BLOCKS[checkBlockAndNeighbors(x, y, z + 1)].id != block.id), // north
+                                (BLOCKS[checkBlockAndNeighbors(x, y, z - 1)].id != block.id), // south
+                                (BLOCKS[checkBlockAndNeighbors(x + 1, y, z)].id != block.id), // east
+                                (BLOCKS[checkBlockAndNeighbors(x - 1, y, z)].id != block.id), // west
+                                (BLOCKS[checkBlockAndNeighbors(x, y + 1, z)].id != block.id), // top
+                                (BLOCKS[checkBlockAndNeighbors(x, y - 1, z)].id != block.id), // bottom
+                            };
+
+                        Geom::BasicMesh newBlock = Geom::generateBlockMesh(worldPos, visibleFaces, block.textures);
+                        transparentMeshes.push_back(newBlock);
+                        continue;
+                        }
+
                         blocksIndicesCount += visibleFaces.count() * 6;
                         Geom::BasicMesh newBlock = Geom::generateBlockMesh(worldPos, visibleFaces, block.textures);
                         blocksMeshes.push_back(newBlock);
@@ -228,7 +251,7 @@ namespace Blocks
         }
 
         blocksMeshes.insert(blocksMeshes.end(), otherMeshes.begin(), otherMeshes.end());
-        return mergeMeshes(blocksMeshes);
+        return {mergeMeshes(blocksMeshes),mergeMeshes(transparentMeshes)};
     }
     void Chunk::setBlock(int x, int y, int z, BlockType type)
     {
@@ -260,8 +283,12 @@ namespace Blocks
     }
     void Chunk::drawChunk()
     {
-        chunkMesh.bind();
-        glDrawElements(GL_TRIANGLES, details ? chunkMesh.getIndexCount() : blocksIndicesCount, GL_UNSIGNED_INT, 0);
+        mainBlocksMesh.bind();
+        glDrawElements(GL_TRIANGLES, details ? mainBlocksMesh.getIndexCount() : blocksIndicesCount, GL_UNSIGNED_INT, 0);
+        if(transparentBlocksMesh.getIndexCount() > 0){
+            transparentBlocksMesh.bind();
+            glDrawElements(GL_TRIANGLES, transparentBlocksMesh.getIndexCount(), GL_UNSIGNED_INT, 0);
+        }
     }
     void Chunk::setDetails(bool details)
     {

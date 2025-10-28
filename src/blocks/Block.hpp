@@ -1,5 +1,5 @@
 #pragma once
-#include <geom/BlockMesh.hpp>
+#include <geom/meshes/BlockMesh.hpp>
 #include <map>
 namespace Blocks{
     enum BlockType : uint8_t{
@@ -7,12 +7,13 @@ namespace Blocks{
         BLOCK_DIRT,
         BLOCK_GRASS,
         BLOCK_STONE,
-        
+        BLOCK_GLASS,
+
         PLANT_GRASS,
         PLANT_FLOWER1,
         PLANT_FLOWER2,
 
-        FLUID_WATER
+        LIQUID_WATER,
     };
     enum BlockMesh{
         BLOCK_MESH = 0,

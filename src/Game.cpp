@@ -51,8 +51,6 @@ void Nanocraft::OnCreate()
     blockShader.setUniformf("uCellWidth", worldAtlas.getCellWidthRatio());
     blockShader.setUniformf("uCellHeight", worldAtlas.getCellHeightRatio());
     blockShader.setUniformf("fadeStart", Blocks::Chunk::CHUNK_SIZE*(renderDistance-1));
-
-    world->loadChunks(player->position); 
 }
 void Nanocraft::OnFrame(float deltaTime)
 {

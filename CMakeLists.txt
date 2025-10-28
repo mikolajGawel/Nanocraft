@@ -12,9 +12,10 @@ add_executable(${PROJECT_NAME}
     src/blocks/Chunk.cpp
     src/blocks/Block.cpp
     src/geom/BlockFace.cpp
-    src/geom/BlockMesh.cpp
-    src/geom/PlantMesh.cpp
-    src/geom/ChunkMesh.cpp
+    src/geom/meshes/BlockMesh.cpp
+    src/geom/meshes/LiquidMesh.cpp
+    src/geom/meshes/PlantMesh.cpp
+    src/geom/meshes/ChunkMesh.cpp
     src/geom/Quad.cpp
     src/world/World.cpp
     src/util/Raycast.cpp

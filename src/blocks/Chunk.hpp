@@ -1,7 +1,7 @@
 #pragma once
 #include "Block.hpp"
-#include <geom/BasicMesh.hpp>
-#include <geom/ChunkMesh.hpp>
+#include <geom/meshes/BasicMesh.hpp>
+#include <geom/meshes/ChunkMesh.hpp>
 #include <memory>
 #include <optional>
 #include <future>
@@ -24,9 +24,10 @@ namespace Blocks
         std::array<std::weak_ptr<Chunk>,4> neighbors;
         Blocks::BlockType checkBlockAndNeighbors(int x,int y,int z);
         Geom::SelectedFaces getVisibleFaces(int x,int y,int z);
-        Geom::BasicMesh getBlocksMesh();
+        std::tuple<Geom::BasicMesh,Geom::BasicMesh> getBlocksMesh();
         
-        Geom::ChunkMesh chunkMesh;
+        Geom::ChunkMesh mainBlocksMesh;
+        Geom::ChunkMesh transparentBlocksMesh;
         std::array<BlockType, CHUNK_SIZE * CHUNK_HEIGHT * CHUNK_SIZE> blocks;
         size_t getIndex(int x, int y, int z) const;
         void refreshNeighborIfExists(ChunkDirection direction);

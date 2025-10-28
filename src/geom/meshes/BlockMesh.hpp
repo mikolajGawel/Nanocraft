@@ -1,6 +1,6 @@
 #pragma once
 #include <geom/Quad.hpp>
-#include <geom/BasicMesh.hpp>
+#include "BasicMesh.hpp"
 namespace Geom
 {
     struct SelectedFaces

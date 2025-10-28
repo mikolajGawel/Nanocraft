@@ -1,5 +1,5 @@
 #include "PlantMesh.hpp"
-#include "BlockFace.hpp"
+#include "../BlockFace.hpp"
 #include <algorithm>
 namespace Geom
 {

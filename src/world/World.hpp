@@ -16,6 +16,9 @@ private:
     };
     uint8_t renderDistance,
         detailsRenderDistance;
+    std::vector<glm::ivec2> renderingOrder;//for chunk to render in correct order (from farthest to nearest)
+
+
     std::unordered_map<glm::ivec2,std::shared_ptr<Blocks::Chunk>,ivec2_hash> loadedChunks;
     std::unordered_map<glm::ivec2,std::shared_ptr<Blocks::Chunk>,ivec2_hash> savedChunks;
     std::unique_ptr<Terrain> terrain;
@@ -31,9 +34,10 @@ private:
     public:
     World(std::unique_ptr<Terrain> terrain,uint8_t renderDistance,uint8_t detailsRenderDistance);
     ~World();
-    void loadChunks(glm::vec3 positon);//loads chunks at location and remove unnecessary chunks
+    std::vector<glm::ivec2> loadChunks(glm::vec3 positon);//loads chunks at location and remove unnecessary one, returns chunks to refresh
     void refreshNearby(glm::ivec2 position);//refreshes chunk and all its neighbors
-    void refresh(std::vector<glm::ivec2> chunksToRefresh);
+    void refreshChunks(std::vector<glm::ivec2> chunksToRefresh);
+    void refreshRenderingOrder(glm::ivec2 center);
     Blocks::BlockType getBlock(glm::ivec3 coordinates);
     void setBlock(glm::ivec3 position, Blocks::BlockType);
     void update(glm::vec3 position);

@@ -1,6 +1,6 @@
 #include "BlockMesh.hpp"
 #include "BasicMesh.hpp"
-#include "BlockFace.hpp"
+#include "../BlockFace.hpp"
 #include <memory>
 
 std::array<bool, 6> faceToArray(Geom::SelectedFaces faces)
