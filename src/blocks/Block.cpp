@@ -7,8 +7,9 @@ namespace Blocks{
 
         Geom::BlockTextureMap grassTextures = Geom::BlockTextureMap::set(1,1,1,1,2,0);  
         BLOCKS[BLOCK_GRASS] = {BLOCK_GRASS,false,grassTextures};
-
         BLOCKS[BLOCK_STONE] = {BLOCK_STONE,false,Geom::BlockTextureMap::all(3)};
+        BLOCKS[BLOCK_SAND] = {BLOCK_SAND,false,Geom::BlockTextureMap::all(4)};
+
         BLOCKS[PLANT_GRASS] = {PLANT_GRASS,true,Geom::BlockTextureMap::all(16),BlockMesh::PLANT_MESH};
         BLOCKS[PLANT_FLOWER1] = {PLANT_FLOWER1,true,Geom::BlockTextureMap::all(17),BlockMesh::PLANT_MESH};
         BLOCKS[PLANT_FLOWER2] = {PLANT_FLOWER2,true,Geom::BlockTextureMap::all(18),BlockMesh::PLANT_MESH};

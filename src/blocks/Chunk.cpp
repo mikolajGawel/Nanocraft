@@ -123,12 +123,26 @@ namespace Blocks
                 }
                 if (height < 5)
                 {
-                    for (int y = 4; y > 0; y--)
+
+                    for (int y = 4; y >= 0; y--)
                     {
-                        if (!isBlockTransparent(result->blocks[result->getIndex(x, y, z)]))
+                        if (result->blocks[result->getIndex(x, y, z)] != BLOCK_AIR)
+                        {
+                            result->blocks[result->getIndex(x, y, z)] = BLOCK_SAND;
                             break;
+                        }
                         result->blocks[result->getIndex(x, y, z)] = LIQUID_WATER;
                     }
+                }
+                if (height == 4)
+                {
+                    int a= 0;
+                    a += (int)(terrain.getTerrainHeight(x + 1 + CHUNK_SIZE * chunkPosition.x, z + CHUNK_SIZE * chunkPosition.y) <= 4);
+                    a += (int)(terrain.getTerrainHeight(x - 1 + CHUNK_SIZE * chunkPosition.x, z + CHUNK_SIZE * chunkPosition.y) <= 4);
+                    a += (int)(terrain.getTerrainHeight(x + CHUNK_SIZE * chunkPosition.x, z + 1 + CHUNK_SIZE * chunkPosition.y) <= 4);
+                    a += (int)(terrain.getTerrainHeight(x + CHUNK_SIZE * chunkPosition.x, z - 1 + CHUNK_SIZE * chunkPosition.y) <= 4);
+                    if(a <= 3)
+                        result->blocks[result->getIndex(x, height, z)] = BLOCK_SAND;
                 }
                 else
                 {
@@ -165,7 +179,7 @@ namespace Blocks
     }
     void Chunk::refreshChunk()
     {
-        auto [mesh,mesh2] = getBlocksMesh();
+        auto [mesh, mesh2] = getBlocksMesh();
         mainBlocksMesh.setMesh(mesh);
         transparentBlocksMesh.setMesh(mesh2);
     }
@@ -177,7 +191,7 @@ namespace Blocks
         }
         refreshChunk();
     }
-    std::tuple<Geom::BasicMesh,Geom::BasicMesh> Chunk::getBlocksMesh()
+    std::tuple<Geom::BasicMesh, Geom::BasicMesh> Chunk::getBlocksMesh()
     {
         blocksIndicesCount = 0;
         // it appends meshes to 2 diffrent lists that are later merged but prioritize blocks so they can be only rendered wihtout details
@@ -207,18 +221,21 @@ namespace Blocks
                         if (block.blockMeshType == Blocks::BlockMesh::LIQUID_MESH)
                         {
                             Geom::SelectedFaces visibleFaces = Geom::SelectedFaces{
-                                //makes faces visible only for air and liqiuds with other id
-                                ( BLOCK_AIR == checkBlockAndNeighbors(x, y, z + 1) || (BLOCKS[checkBlockAndNeighbors(x, y, z + 1)].blockMeshType == BlockMesh::LIQUID_MESH && BLOCKS[checkBlockAndNeighbors(x, y, z + 1)].id != block.id)), // north
-                                ( BLOCK_AIR == checkBlockAndNeighbors(x, y, z - 1) || (BLOCKS[checkBlockAndNeighbors(x, y, z - 1)].blockMeshType == BlockMesh::LIQUID_MESH && BLOCKS[checkBlockAndNeighbors(x, y, z - 1)].id != block.id)), // south
-                                ( BLOCK_AIR == checkBlockAndNeighbors(x + 1, y, z) || (BLOCKS[checkBlockAndNeighbors(x + 1, y, z)].blockMeshType == BlockMesh::LIQUID_MESH && BLOCKS[checkBlockAndNeighbors(x + 1, y, z)].id != block.id)), // east
-                                ( BLOCK_AIR == checkBlockAndNeighbors(x - 1, y, z) || (BLOCKS[checkBlockAndNeighbors(x - 1, y, z)].blockMeshType == BlockMesh::LIQUID_MESH && BLOCKS[checkBlockAndNeighbors(x - 1, y, z)].id != block.id)), // west
-                                ( BLOCK_AIR == checkBlockAndNeighbors(x, y + 1, z) || (BLOCKS[checkBlockAndNeighbors(x, y + 1, z)].blockMeshType == BlockMesh::LIQUID_MESH && BLOCKS[checkBlockAndNeighbors(x, y + 1, z)].id != block.id)), // top
-                                ( BLOCK_AIR == checkBlockAndNeighbors(x, y - 1, z) || (BLOCKS[checkBlockAndNeighbors(x, y - 1, z)].blockMeshType == BlockMesh::LIQUID_MESH && BLOCKS[checkBlockAndNeighbors(x, y - 1, z)].id != block.id)), // bottom
+                                // makes faces visible only for air and liqiuds with other id
+                                (BLOCK_AIR == checkBlockAndNeighbors(x, y, z + 1) || (BLOCKS[checkBlockAndNeighbors(x, y, z + 1)].blockMeshType == BlockMesh::LIQUID_MESH && BLOCKS[checkBlockAndNeighbors(x, y, z + 1)].id != block.id)), // north
+                                (BLOCK_AIR == checkBlockAndNeighbors(x, y, z - 1) || (BLOCKS[checkBlockAndNeighbors(x, y, z - 1)].blockMeshType == BlockMesh::LIQUID_MESH && BLOCKS[checkBlockAndNeighbors(x, y, z - 1)].id != block.id)), // south
+                                (BLOCK_AIR == checkBlockAndNeighbors(x + 1, y, z) || (BLOCKS[checkBlockAndNeighbors(x + 1, y, z)].blockMeshType == BlockMesh::LIQUID_MESH && BLOCKS[checkBlockAndNeighbors(x + 1, y, z)].id != block.id)), // east
+                                (BLOCK_AIR == checkBlockAndNeighbors(x - 1, y, z) || (BLOCKS[checkBlockAndNeighbors(x - 1, y, z)].blockMeshType == BlockMesh::LIQUID_MESH && BLOCKS[checkBlockAndNeighbors(x - 1, y, z)].id != block.id)), // west
+                                (BLOCK_AIR == checkBlockAndNeighbors(x, y + 1, z) || (BLOCKS[checkBlockAndNeighbors(x, y + 1, z)].blockMeshType == BlockMesh::LIQUID_MESH && BLOCKS[checkBlockAndNeighbors(x, y + 1, z)].id != block.id)), // top
+                                (BLOCK_AIR == checkBlockAndNeighbors(x, y - 1, z) || (BLOCKS[checkBlockAndNeighbors(x, y - 1, z)].blockMeshType == BlockMesh::LIQUID_MESH && BLOCKS[checkBlockAndNeighbors(x, y - 1, z)].id != block.id)), // bottom
                             };
                             Geom::BasicMesh newBlock = Geom::generateLiquidMesh(worldPos, visibleFaces, block.textures);
-                            if(block.transparent){
+                            if (block.transparent)
+                            {
                                 transparentMeshes.push_back(newBlock);
-                            }else{
+                            }
+                            else
+                            {
                                 blocksMeshes.push_back(newBlock);
                                 blocksIndicesCount += visibleFaces.count() * 6;
                             }
@@ -226,9 +243,10 @@ namespace Blocks
                         }
 
                         Geom::SelectedFaces visibleFaces = getVisibleFaces(x, y, z);
-                        if(block.transparent){
-                             visibleFaces = Geom::SelectedFaces{
-                                //makes faces visible only for air and liqiuds with other id
+                        if (block.transparent)
+                        {
+                            visibleFaces = Geom::SelectedFaces{
+                                // makes faces visible only for air and liqiuds with other id
                                 (BLOCKS[checkBlockAndNeighbors(x, y, z + 1)].id != block.id), // north
                                 (BLOCKS[checkBlockAndNeighbors(x, y, z - 1)].id != block.id), // south
                                 (BLOCKS[checkBlockAndNeighbors(x + 1, y, z)].id != block.id), // east
@@ -237,9 +255,9 @@ namespace Blocks
                                 (BLOCKS[checkBlockAndNeighbors(x, y - 1, z)].id != block.id), // bottom
                             };
 
-                        Geom::BasicMesh newBlock = Geom::generateBlockMesh(worldPos, visibleFaces, block.textures);
-                        transparentMeshes.push_back(newBlock);
-                        continue;
+                            Geom::BasicMesh newBlock = Geom::generateBlockMesh(worldPos, visibleFaces, block.textures);
+                            transparentMeshes.push_back(newBlock);
+                            continue;
                         }
 
                         blocksIndicesCount += visibleFaces.count() * 6;
@@ -251,7 +269,7 @@ namespace Blocks
         }
 
         blocksMeshes.insert(blocksMeshes.end(), otherMeshes.begin(), otherMeshes.end());
-        return {mergeMeshes(blocksMeshes),mergeMeshes(transparentMeshes)};
+        return {mergeMeshes(blocksMeshes), mergeMeshes(transparentMeshes)};
     }
     void Chunk::setBlock(int x, int y, int z, BlockType type)
     {
@@ -285,7 +303,8 @@ namespace Blocks
     {
         mainBlocksMesh.bind();
         glDrawElements(GL_TRIANGLES, details ? mainBlocksMesh.getIndexCount() : blocksIndicesCount, GL_UNSIGNED_INT, 0);
-        if(transparentBlocksMesh.getIndexCount() > 0){
+        if (transparentBlocksMesh.getIndexCount() > 0)
+        {
             transparentBlocksMesh.bind();
             glDrawElements(GL_TRIANGLES, transparentBlocksMesh.getIndexCount(), GL_UNSIGNED_INT, 0);
         }

@@ -7,6 +7,7 @@ namespace Blocks{
         BLOCK_DIRT,
         BLOCK_GRASS,
         BLOCK_STONE,
+        BLOCK_SAND,
         BLOCK_GLASS,
 
         PLANT_GRASS,
