@@ -11,11 +11,11 @@ Made using C++ and OpenGL framework.
 #### Building
 ##### On Unix like operating system
 Before building project remember to get git submodules\
-and run `python3 gl3w_gen.py` in externals/gl3w for opengl files\
+and run `python3 gl3w_gen.py` in externals/gl3w for opengl files
 
 `cmake -S . -B build/`\
 `cd build`\
-`make`\
+`make`
 
 If you want to move executable to another folder\
 Remember to copy `resources/` as well
