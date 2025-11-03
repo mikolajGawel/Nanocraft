@@ -10,6 +10,9 @@ namespace Blocks{
         BLOCK_SAND,
         BLOCK_GLASS,
 
+        BLOCK_WOOD,
+        BLOCK_LEAVES,
+
         PLANT_GRASS,
         PLANT_FLOWER1,
         PLANT_FLOWER2,

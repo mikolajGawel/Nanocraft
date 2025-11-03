@@ -15,7 +15,11 @@ namespace Blocks{
         BLOCKS[PLANT_FLOWER2] = {PLANT_FLOWER2,true,Geom::BlockTextureMap::all(18),BlockMesh::PLANT_MESH};
         
         BLOCKS[BLOCK_GLASS] = {BLOCK_GLASS,true,Geom::BlockTextureMap::all(32)};
-
+        
+        Geom::BlockTextureMap wood = Geom::BlockTextureMap::set(5,5,5,5,6,6);
+        BLOCKS[BLOCK_WOOD]   = {BLOCK_WOOD,false,wood};
+        BLOCKS[BLOCK_LEAVES] = {BLOCK_LEAVES,true,Geom::BlockTextureMap::all(19)};
+        
         BLOCKS[LIQUID_WATER] = {LIQUID_WATER,true,Geom::BlockTextureMap::all(33),BlockMesh::LIQUID_MESH};
     }
     bool isBlockTransparent(BlockType blockType){

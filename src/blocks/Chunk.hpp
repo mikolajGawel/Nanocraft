@@ -24,7 +24,7 @@ namespace Blocks
         std::array<std::weak_ptr<Chunk>,4> neighbors;
         Blocks::BlockType checkBlockAndNeighbors(int x,int y,int z);
         Geom::SelectedFaces getVisibleFaces(int x,int y,int z);
-        std::tuple<Geom::BasicMesh,Geom::BasicMesh> getBlocksMesh();
+        std::tuple<Geom::BasicMesh,Geom::BasicMesh> getBlocksMesh();//returns mesh for normal and transparent blocks
         
         Geom::ChunkMesh mainBlocksMesh;
         Geom::ChunkMesh transparentBlocksMesh;

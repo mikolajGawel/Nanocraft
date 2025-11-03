@@ -26,3 +26,12 @@ Terrain::TerrainDecoration Terrain::getTerrainDecoration(int x,int y){
     if(i > 7) return GRASS;
     return NONE;
 }
+bool Terrain::getTree(int x,int y){
+    float result = Noise::perlin(seed,x, y);
+    int index = floor(abs(result*30));
+    if(index == 25 ) return true;
+    return false;
+}
+int Terrain::getWaterLevel(){
+    return terrainSettings.waterLevel;
+}

@@ -110,9 +110,11 @@ namespace Blocks
         {
             for (int z = 0; z < CHUNK_SIZE; z++)
             {
+                const int waterLevel = terrain.getWaterLevel();
+                glm::ivec2 blockWorldPos = glm::ivec2(x + CHUNK_SIZE * chunkPosition.x, z + CHUNK_SIZE * chunkPosition.y);
+                int height = terrain.getTerrainHeight(blockWorldPos.x, blockWorldPos.y);
 
-                int height = terrain.getTerrainHeight(x + CHUNK_SIZE * chunkPosition.x, z + CHUNK_SIZE * chunkPosition.y);
-                for (int y = 0; y < height; y++)
+                for (int y = 0; y < height; y++) // sets basic height level
                 {
                     if (y == height - 1)
                         result->blocks[result->getIndex(x, y, z)] = BLOCK_GRASS;
@@ -121,10 +123,10 @@ namespace Blocks
                     else
                         result->blocks[result->getIndex(x, y, z)] = BLOCK_STONE;
                 }
-                if (height < 5)
+                if (height <= waterLevel) // creates water and sand underneath
                 {
 
-                    for (int y = 4; y >= 0; y--)
+                    for (int y = waterLevel; y >= 0; y--)
                     {
                         if (result->blocks[result->getIndex(x, y, z)] != BLOCK_AIR)
                         {
@@ -134,23 +136,59 @@ namespace Blocks
                         result->blocks[result->getIndex(x, y, z)] = LIQUID_WATER;
                     }
                 }
-                if (height == 4)
+                if (height == waterLevel) // creates sand around water
                 {
-                    int a= 0;
-                    a += (int)(terrain.getTerrainHeight(x + 1 + CHUNK_SIZE * chunkPosition.x, z + CHUNK_SIZE * chunkPosition.y) <= 4);
-                    a += (int)(terrain.getTerrainHeight(x - 1 + CHUNK_SIZE * chunkPosition.x, z + CHUNK_SIZE * chunkPosition.y) <= 4);
-                    a += (int)(terrain.getTerrainHeight(x + CHUNK_SIZE * chunkPosition.x, z + 1 + CHUNK_SIZE * chunkPosition.y) <= 4);
-                    a += (int)(terrain.getTerrainHeight(x + CHUNK_SIZE * chunkPosition.x, z - 1 + CHUNK_SIZE * chunkPosition.y) <= 4);
-                    if(a <= 3)
+                    int waterBlocksCount = 0;
+                    waterBlocksCount += (int)(terrain.getTerrainHeight(blockWorldPos.x + 1, blockWorldPos.y) <= 4);
+                    waterBlocksCount += (int)(terrain.getTerrainHeight(blockWorldPos.x - 1, blockWorldPos.y) <= 4);
+                    waterBlocksCount += (int)(terrain.getTerrainHeight(blockWorldPos.x, blockWorldPos.y + 1) <= 4);
+                    waterBlocksCount += (int)(terrain.getTerrainHeight(blockWorldPos.x, blockWorldPos.y - 1) <= 4);
+                    if (waterBlocksCount <= 3)
                         result->blocks[result->getIndex(x, height, z)] = BLOCK_SAND;
                 }
-                else
+
+                Terrain::TerrainDecoration deco = terrain.getTerrainDecoration(blockWorldPos.x, blockWorldPos.y);
+                if (deco != Terrain::NONE && result->blocks[result->getIndex(x, height - 1, z)] == BLOCK_GRASS && height > waterLevel)
                 {
-                    Terrain::TerrainDecoration deco = terrain.getTerrainDecoration(x + CHUNK_SIZE * chunkPosition.x, z + CHUNK_SIZE * chunkPosition.y);
-                    if (deco != Terrain::NONE && result->blocks[result->getIndex(x, height - 1, z)] == BLOCK_GRASS)
+                    result->blocks[result->getIndex(x, height, z)] = static_cast<BlockType>(deco);
+                }
+                
+                //creates trunk of tree and leaves on top
+                if (terrain.getTree(blockWorldPos.x, blockWorldPos.y) && height > waterLevel)
+                {
+                    for (int i = height; i < height + 7; i++)
                     {
-                        result->blocks[result->getIndex(x, height, z)] = static_cast<BlockType>(deco);
+                        result->blocks[result->getIndex(x, i, z)] = (height + 5 > i ? BLOCK_WOOD : BLOCK_LEAVES);
                     }
+                }
+                
+
+                if(!terrain.getTree(blockWorldPos.x, blockWorldPos.y))//create leaves for tree
+                {
+                    // check neighbor blocks for tree
+                    for (int i = -2; i <= 2; i++)
+                        for (int j = -2; j <= 2; j++)
+                        {
+                            glm::ivec2 neighborPos = blockWorldPos + glm::ivec2(i, j);
+                            if (terrain.getTree(neighborPos.x, neighborPos.y))
+                            {
+                                int neighborHeight = terrain.getTerrainHeight(neighborPos.x, neighborPos.y);
+                                
+                                if(neighborHeight <= waterLevel) break;
+
+                                int leavesHeight = 5;
+
+                                if (abs(i) == 1 && abs(j) == 1)
+                                    leavesHeight = 6;
+                                if ((i == 0 && abs(j) < 2) || (abs(i) < 2 && j == 0))
+                                    leavesHeight = 7;
+
+                                for (int i = neighborHeight + 2; i < neighborHeight + leavesHeight; i++)
+                                {
+                                    result->blocks[result->getIndex(x, i, z)] = BLOCK_LEAVES;
+                                }
+                            }
+                        }
                 }
             }
         }
@@ -254,6 +292,11 @@ namespace Blocks
                                 (BLOCKS[checkBlockAndNeighbors(x, y + 1, z)].id != block.id), // top
                                 (BLOCKS[checkBlockAndNeighbors(x, y - 1, z)].id != block.id), // bottom
                             };
+
+                            if (block.id == BLOCK_LEAVES)
+                            { // leaves are always visible and its mesh is not connecting
+                                visibleFaces = Geom::SelectedFaces::all();
+                            }
 
                             Geom::BasicMesh newBlock = Geom::generateBlockMesh(worldPos, visibleFaces, block.textures);
                             transparentMeshes.push_back(newBlock);
