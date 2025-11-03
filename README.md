@@ -10,9 +10,13 @@ Made using C++ and OpenGL framework.
  - (Project is still in work)
 #### Building
 ##### On Unix like operating system
+Before building project remember to get git submodules\
+and run `python3 gl3w_gen.py` in externals/gl3w for opengl files\
+
 `cmake -S . -B build/`\
 `cd build`\
 `make`\
+
 If you want to move executable to another folder\
 Remember to copy `resources/` as well
 ##### On Windows
