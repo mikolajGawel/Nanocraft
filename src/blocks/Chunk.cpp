@@ -123,47 +123,8 @@ namespace Blocks
                     else
                         result->blocks[result->getIndex(x, y, z)] = BLOCK_STONE;
                 }
-                if (height <= waterLevel) // creates water and sand underneath
-                {
 
-                    for (int y = waterLevel; y >= 0; y--)
-                    {
-                        if (result->blocks[result->getIndex(x, y, z)] != BLOCK_AIR)
-                        {
-                            result->blocks[result->getIndex(x, y, z)] = BLOCK_SAND;
-                            break;
-                        }
-                        result->blocks[result->getIndex(x, y, z)] = LIQUID_WATER;
-                    }
-                }
-                if (height == waterLevel) // creates sand around water
-                {
-                    int waterBlocksCount = 0;
-                    waterBlocksCount += (int)(terrain.getTerrainHeight(blockWorldPos.x + 1, blockWorldPos.y) <= 4);
-                    waterBlocksCount += (int)(terrain.getTerrainHeight(blockWorldPos.x - 1, blockWorldPos.y) <= 4);
-                    waterBlocksCount += (int)(terrain.getTerrainHeight(blockWorldPos.x, blockWorldPos.y + 1) <= 4);
-                    waterBlocksCount += (int)(terrain.getTerrainHeight(blockWorldPos.x, blockWorldPos.y - 1) <= 4);
-                    if (waterBlocksCount <= 3)
-                        result->blocks[result->getIndex(x, height, z)] = BLOCK_SAND;
-                }
-
-                Terrain::TerrainDecoration deco = terrain.getTerrainDecoration(blockWorldPos.x, blockWorldPos.y);
-                if (deco != Terrain::NONE && result->blocks[result->getIndex(x, height - 1, z)] == BLOCK_GRASS && height > waterLevel)
-                {
-                    result->blocks[result->getIndex(x, height, z)] = static_cast<BlockType>(deco);
-                }
-                
-                //creates trunk of tree and leaves on top
-                if (terrain.getTree(blockWorldPos.x, blockWorldPos.y) && height > waterLevel)
-                {
-                    for (int i = height; i < height + 7; i++)
-                    {
-                        result->blocks[result->getIndex(x, i, z)] = (height + 5 > i ? BLOCK_WOOD : BLOCK_LEAVES);
-                    }
-                }
-                
-
-                if(!terrain.getTree(blockWorldPos.x, blockWorldPos.y))//create leaves for tree
+                if (!terrain.getTree(blockWorldPos.x, blockWorldPos.y)) // create leaves for nearby tree
                 {
                     // check neighbor blocks for tree
                     for (int i = -2; i <= 2; i++)
@@ -173,8 +134,9 @@ namespace Blocks
                             if (terrain.getTree(neighborPos.x, neighborPos.y))
                             {
                                 int neighborHeight = terrain.getTerrainHeight(neighborPos.x, neighborPos.y);
-                                
-                                if(neighborHeight <= waterLevel) break;
+
+                                if (neighborHeight <= waterLevel)
+                                    break;
 
                                 int leavesHeight = 5;
 
@@ -189,6 +151,46 @@ namespace Blocks
                                 }
                             }
                         }
+                }
+                
+                if (height <= waterLevel) //when terrain is lower than water level
+                {
+                    // creates water and sand underneath
+                    for (int y = waterLevel; y >= 0; y--)
+                    {
+                        if (result->blocks[result->getIndex(x, y, z)] != BLOCK_AIR)
+                        {
+                            result->blocks[result->getIndex(x, y, z)] = BLOCK_SAND;
+                            break;
+                        }
+                        result->blocks[result->getIndex(x, y, z)] = LIQUID_WATER;
+                    }
+                    if (height == waterLevel) // creates sand around water
+                    {
+                        int waterBlocksCount = 0;
+                        waterBlocksCount += (int)(terrain.getTerrainHeight(blockWorldPos.x + 1, blockWorldPos.y) <= 4);
+                        waterBlocksCount += (int)(terrain.getTerrainHeight(blockWorldPos.x - 1, blockWorldPos.y) <= 4);
+                        waterBlocksCount += (int)(terrain.getTerrainHeight(blockWorldPos.x, blockWorldPos.y + 1) <= 4);
+                        waterBlocksCount += (int)(terrain.getTerrainHeight(blockWorldPos.x, blockWorldPos.y - 1) <= 4);
+                        if (waterBlocksCount <= 3)
+                            result->blocks[result->getIndex(x, height, z)] = BLOCK_SAND;
+                    }
+                    continue;
+                }
+
+                Terrain::TerrainDecoration deco = terrain.getTerrainDecoration(blockWorldPos.x, blockWorldPos.y);
+                if (deco != Terrain::NONE && result->blocks[result->getIndex(x, height - 1, z)] == BLOCK_GRASS && height > waterLevel)
+                {
+                    result->blocks[result->getIndex(x, height, z)] = static_cast<BlockType>(deco);
+                }
+
+                // creates trunk of tree and leaves on top
+                if (terrain.getTree(blockWorldPos.x, blockWorldPos.y) && height > waterLevel)
+                {
+                    for (int i = height; i < height + 7; i++)
+                    {
+                        result->blocks[result->getIndex(x, i, z)] = (height + 5 > i ? BLOCK_WOOD : BLOCK_LEAVES);
+                    }
                 }
             }
         }
