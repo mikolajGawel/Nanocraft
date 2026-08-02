@@ -51,8 +51,9 @@ namespace Raycast
             }
 
             Blocks::BlockType hit = world.getBlock(currMapPos);
-            if (hit != Blocks::BLOCK_AIR)
+            if (hit != Blocks::BLOCK_AIR && Blocks::getBlockMeshType(hit) != Blocks::BlockMesh::LIQUID_MESH) 
             {
+                
                 return (RaycastHit){
                     currMapPos,
                     hit,

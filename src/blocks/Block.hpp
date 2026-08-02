@@ -31,6 +31,7 @@ namespace Blocks{
         BlockMesh blockMeshType = BLOCK_MESH;
     };
     extern std::map<BlockType,Block> BLOCKS;
+    BlockMesh getBlockMeshType(BlockType blockType);
     bool isBlockTransparent(BlockType blockType);
     void initBlocks();
 }

@@ -22,6 +22,10 @@ namespace Blocks{
         
         BLOCKS[LIQUID_WATER] = {LIQUID_WATER,true,Geom::BlockTextureMap::all(33),BlockMesh::LIQUID_MESH};
     }
+    BlockMesh getBlockMeshType(BlockType blockType){
+        return BLOCKS[blockType].blockMeshType;
+    }
+
     bool isBlockTransparent(BlockType blockType){
         return BLOCKS[blockType].transparent;
     }

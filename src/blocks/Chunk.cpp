@@ -262,12 +262,12 @@ namespace Blocks
                         {
                             Geom::SelectedFaces visibleFaces = Geom::SelectedFaces{
                                 // makes faces visible only for air and liqiuds with other id
-                                (BLOCK_AIR == checkBlockAndNeighbors(x, y, z + 1) || (BLOCKS[checkBlockAndNeighbors(x, y, z + 1)].blockMeshType == BlockMesh::LIQUID_MESH && BLOCKS[checkBlockAndNeighbors(x, y, z + 1)].id != block.id)), // north
-                                (BLOCK_AIR == checkBlockAndNeighbors(x, y, z - 1) || (BLOCKS[checkBlockAndNeighbors(x, y, z - 1)].blockMeshType == BlockMesh::LIQUID_MESH && BLOCKS[checkBlockAndNeighbors(x, y, z - 1)].id != block.id)), // south
-                                (BLOCK_AIR == checkBlockAndNeighbors(x + 1, y, z) || (BLOCKS[checkBlockAndNeighbors(x + 1, y, z)].blockMeshType == BlockMesh::LIQUID_MESH && BLOCKS[checkBlockAndNeighbors(x + 1, y, z)].id != block.id)), // east
-                                (BLOCK_AIR == checkBlockAndNeighbors(x - 1, y, z) || (BLOCKS[checkBlockAndNeighbors(x - 1, y, z)].blockMeshType == BlockMesh::LIQUID_MESH && BLOCKS[checkBlockAndNeighbors(x - 1, y, z)].id != block.id)), // west
-                                (BLOCK_AIR == checkBlockAndNeighbors(x, y + 1, z) || (BLOCKS[checkBlockAndNeighbors(x, y + 1, z)].blockMeshType == BlockMesh::LIQUID_MESH && BLOCKS[checkBlockAndNeighbors(x, y + 1, z)].id != block.id)), // top
-                                (BLOCK_AIR == checkBlockAndNeighbors(x, y - 1, z) || (BLOCKS[checkBlockAndNeighbors(x, y - 1, z)].blockMeshType == BlockMesh::LIQUID_MESH && BLOCKS[checkBlockAndNeighbors(x, y - 1, z)].id != block.id)), // bottom
+                                (BLOCKS[checkBlockAndNeighbors(x, y, z + 1)].id != block.id), // north
+                                (BLOCKS[checkBlockAndNeighbors(x, y, z - 1)].id != block.id), // south
+                                (BLOCKS[checkBlockAndNeighbors(x + 1, y, z)].id != block.id), // east
+                                (BLOCKS[checkBlockAndNeighbors(x - 1, y, z)].id != block.id), // west
+                                (BLOCKS[checkBlockAndNeighbors(x, y + 1, z)].id != block.id), // top
+                                (BLOCKS[checkBlockAndNeighbors(x, y - 1, z)].id != block.id), // bottom
                             };
                             Geom::BasicMesh newBlock = Geom::generateLiquidMesh(worldPos, visibleFaces, block.textures);
                             if (block.transparent)
