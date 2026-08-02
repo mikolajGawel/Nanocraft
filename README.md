@@ -11,7 +11,7 @@ Made using C++ and OpenGL framework.
 #### Building
 ##### On Unix like operating system
 Before building project remember to get git submodules\
-and run `python3 gl3w_gen.py` in externals/gl3w for opengl files
+python3 is required for generating gl3w opengl files
 
 `cmake -S . -B build/`\
 `cd build`\

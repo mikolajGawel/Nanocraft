@@ -34,6 +34,8 @@ if(POLICY CMP0072)
   cmake_policy(SET CMP0072 NEW)
 endif()
 
+
+
 # Include submodules
 add_subdirectory(externals/glfw)
 add_subdirectory(externals/gl3w)
@@ -47,7 +49,6 @@ if(APPLE)
     set(OPENGL_LIBRARIES "-framework OpenGL")
 else()
     find_package(OpenGL REQUIRED)
- #  set(OPENGL_LIBRARIES OpenGL)
 endif()
 
 # Freetype paths (Use Freetype targets instead)
@@ -60,6 +61,14 @@ target_include_directories(${PROJECT_NAME}
     PUBLIC externals/stb
     PUBLIC src/
 )
+
+#Automatically generates GL3W File (requires python) 
+if(NOT EXISTS "${CMAKE_SOURCE_DIR}/externals/gl3w/src/gl3w.c")
+    execute_process( 
+        WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}/externals/gl3w/
+        COMMAND python3 gl3w_gen.py
+        )
+endif()
 
 add_library(gl3w_lib externals/gl3w/src/gl3w.c)
 target_include_directories(gl3w_lib 
